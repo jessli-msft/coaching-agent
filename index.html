@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Copilot Service Workspace</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+button,input,textarea,select{font-family:"Segoe UI",Segoe UI,system-ui,-apple-system,sans-serif}
+body{font-family:"Segoe UI",Segoe UI,system-ui,-apple-system,sans-serif;font-size:14px;font-weight:400;color:#201f1e;background:#f3f2f1;overflow:hidden;height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+
+/* ── TOP NAV ── */
+#top-nav{height:48px;background:#1b2a3b;display:flex;align-items:center;padding:0 4px;gap:0;flex-shrink:0;z-index:300}
+.tn-left{display:flex;align-items:center;flex-shrink:0}
+.tn-center{flex:1;display:flex;align-items:center;justify-content:center;padding:0 16px}
+.tn-right{display:flex;align-items:center;gap:0;flex-shrink:0}
+.tn-ico{width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;cursor:pointer;color:rgba(255,255,255,.7);border-radius:2px;flex-shrink:0}
+.tn-ico:hover{background:rgba(255,255,255,.1);color:#fff}
+.tn-ico svg{width:18px;height:18px}
+.tn-brand{display:flex;align-items:center;gap:8px;padding:0 8px;font-size:13px;font-weight:400;color:rgba(255,255,255,.9);white-space:nowrap;letter-spacing:.1px}
+.tn-sep{width:1px;height:18px;background:rgba(255,255,255,.2);margin:0 2px}
+.tn-app{font-size:13px;color:rgba(255,255,255,.85);padding:0 10px;font-weight:300;letter-spacing:.1px;white-space:nowrap}
+.tn-search{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:4px 14px;width:320px;max-width:100%}
+.tn-search svg{width:14px;height:14px;color:rgba(255,255,255,.6);flex-shrink:0}
+.tn-search input{background:transparent;border:none;outline:none;font-size:13px;color:rgba(255,255,255,.9);font-family:inherit;width:100%;caret-color:rgba(255,255,255,.9)}
+.tn-search input::placeholder{color:rgba(255,255,255,.5)}
+.tn-avatar{width:32px;height:32px;border-radius:50%;background:#0078d4;border:1.5px solid rgba(255,255,255,.4);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;margin:0 4px;flex-shrink:0}
+.tn-avatar:hover{border-color:rgba(255,255,255,.7)}
+
+/* ── SESSION TABS ── */
+#session-tabs{height:36px;background:#fff;border-bottom:1px solid #edebe9;display:flex;align-items:stretch;flex-shrink:0;padding-left:0;overflow:hidden}
+#item-tabs{display:flex;align-items:stretch}
+.st-hamburger{width:40px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;cursor:pointer;color:#605e5c;flex-shrink:0;border-right:1px solid #edebe9}
+.st-hamburger:hover{background:#f3f2f1;color:#201f1e}
+.st-hamburger svg{width:16px;height:16px}
+.st-tab{display:flex;align-items:center;gap:6px;padding:0 12px;border:none;background:transparent;cursor:pointer;font-size:13px;color:#605e5c;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;position:relative}
+.st-tab:hover{background:#f3f2f1;color:#201f1e}
+.st-tab.active{color:#0078d4;border-bottom-color:#0078d4;font-weight:600;background:#fff}
+.st-tab svg{width:14px;height:14px;flex-shrink:0}
+.st-tab .st-close{width:18px;height:18px;border-radius:50%;background:transparent;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#a19f9d;font-size:14px;line-height:1;margin-left:2px;padding:0;flex-shrink:0}
+.st-tab .st-close:hover{background:#edebe9;color:#201f1e}
+
+/* ── APP BODY ── */
+#app-body{display:flex;flex:1;overflow:hidden}
+
+/* ── SIDE NAV OVERLAY DRAWER ── */
+#nav-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:500;display:none}
+#side-nav{position:fixed;top:0;left:0;bottom:0;width:268px;background:#fff;z-index:501;transform:translateX(-100%);transition:transform .2s ease;display:flex;flex-direction:column;box-shadow:0 8px 16px rgba(0,0,0,.14)}
+#side-nav.open{transform:translateX(0)}
+.snav-hd{height:48px;background:#1b2a3b;display:flex;align-items:center;padding:0 8px;gap:8px;flex-shrink:0}
+.snav-close{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;cursor:pointer;color:rgba(255,255,255,.7);border-radius:2px}
+.snav-close:hover{background:rgba(255,255,255,.1);color:#fff}
+.snav-title{font-size:14px;font-weight:600;color:rgba(255,255,255,.9)}
+.snav-scroll{flex:1;overflow-y:auto;padding:4px 0}
+.snav-scroll::-webkit-scrollbar{width:4px}
+.snav-scroll::-webkit-scrollbar-thumb{background:#c8c6c4;border-radius:2px}
+.snav-section{font-size:11px;font-weight:600;color:#a19f9d;text-transform:uppercase;letter-spacing:.6px;padding:10px 16px 3px}
+.snav-item{display:flex;align-items:center;gap:10px;height:36px;padding:0 16px;cursor:pointer;border:none;background:transparent;width:100%;text-align:left;font-size:13px;color:#605e5c;border-left:3px solid transparent}
+.snav-item:hover{background:#f3f2f1;color:#201f1e}
+.snav-item.active{background:#eff6fc;color:#0078d4;font-weight:600;border-left-color:#0078d4}
+.snav-item svg{width:15px;height:15px;flex-shrink:0;opacity:.75}
+
+/* ── INBOX PANE ── */
+#inbox-pane{width:300px;background:#f3f2f1;border-right:1px solid #edebe9;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;transition:width .2s ease;position:relative}
+#inbox-pane.collapsed{width:0}
+.ip-header{display:flex;align-items:center;justify-content:space-between;padding:10px 10px 8px 14px;border-bottom:1px solid #edebe9;background:#fff;flex-shrink:0;gap:4px}
+.ip-title{font-size:13px;font-weight:600;color:#201f1e;flex:1;white-space:nowrap;overflow:hidden;letter-spacing:-.1px}
+.ip-icons{display:flex;align-items:center;gap:0;flex-shrink:0}
+.ip-ico{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;cursor:pointer;color:#605e5c;border-radius:4px}
+.ip-ico:hover{background:#f3f2f1;color:#201f1e}
+.ip-ico svg{width:14px;height:14px}
+/* nav flyout — hidden by default */
+.ip-nav-flyout{position:absolute;top:52px;left:8px;right:8px;background:#fff;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14),0 2px 6px rgba(0,0,0,.08);z-index:50;display:none;overflow:hidden;border:1px solid #edebe9}
+.ip-nav-flyout.open{display:block}
+.ip-nav-item{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;cursor:pointer;font-size:13px;color:#605e5c;gap:8px;border-bottom:1px solid #f3f2f1}
+.ip-nav-item:last-child{border-bottom:none}
+.ip-nav-item:hover{background:#f3f2f1}
+.ip-nav-item.active{color:#0078d4;font-weight:600;background:#eff6fc}
+.ip-nav-left{display:flex;align-items:center;gap:9px}
+.ip-nav-left svg{width:15px;height:15px;flex-shrink:0;opacity:.8}
+.ip-nav-badge{background:#0078d4;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;flex-shrink:0;letter-spacing:.3px}
+.ip-nav-badge.gray{background:#edebe9;color:#605e5c}
+.ip-group-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 4px;flex-shrink:0}
+.ip-group-label{font-size:11px;font-weight:600;color:#a19f9d;text-transform:uppercase;letter-spacing:.6px}
+.ip-list-count{font-size:11px;color:#c8c6c4;font-weight:400}
+.ip-scroll{flex:1;overflow-y:auto;padding:4px 8px 8px}
+.ip-scroll::-webkit-scrollbar{width:4px}
+.ip-scroll::-webkit-scrollbar-thumb{background:#c8c6c4;border-radius:2px}
+.ip-footer{padding:6px 12px;border-top:1px solid #edebe9;font-size:11px;color:#a19f9d;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── WORK ITEM CARDS ── */
+.wi-item{display:flex;align-items:flex-start;padding:10px 12px 10px 10px;cursor:pointer;border-radius:8px;border:1.5px solid transparent;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:6px;transition:box-shadow .15s,border-color .15s}
+.wi-item:hover{box-shadow:0 4px 12px rgba(0,0,0,.1);border-color:#edebe9}
+.wi-item.selected{background:#eff6fc;border-color:#0078d4;box-shadow:0 0 0 1px rgba(0,120,212,.2),0 4px 12px rgba(0,120,212,.1)}
+.wi-item.selected .wi-title{color:#0078d4}
+.wi-unread-col{width:14px;display:flex;align-items:flex-start;justify-content:center;padding-top:6px;flex-shrink:0}
+.wi-dot{width:7px;height:7px;border-radius:50%;background:#0078d4}
+.wi-type-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:9px;margin-top:0}
+.wi-type-icon.case-icon{background:#8764b8}
+.wi-type-icon.email-icon{background:#4f78d4}
+.wi-type-icon svg{width:14px;height:14px;color:#fff}
+.wi-body{flex:1;min-width:0}
+.wi-title{font-size:13px;font-weight:600;color:#201f1e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;margin-bottom:3px}
+.wi-casenum{font-size:12px;color:#0078d4;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wi-customer{font-size:12px;color:#605e5c;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wi-meta{font-size:11px;color:#a19f9d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── COLLAPSE TOGGLE ── */
+#pane-toggle{position:absolute;right:-13px;top:50%;transform:translateY(-50%);width:13px;height:40px;background:#fff;border:1px solid #edebe9;border-left:none;border-radius:0 4px 4px 0;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;box-shadow:2px 0 4px rgba(0,0,0,.08)}
+#pane-toggle:hover{background:#f3f2f1}
+#pane-toggle svg{width:10px;height:10px;color:#605e5c}
+
+/* ── MAIN CONTENT ── */
+#main-content{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f3f2f1;min-width:0}
+.main-scroll{flex:1;overflow-y:auto;overflow-x:hidden}
+.main-scroll::-webkit-scrollbar{width:6px}
+.main-scroll::-webkit-scrollbar-thumb{background:#c8c6c4;border-radius:3px}
+
+/* ── COMMAND BAR ── */
+.cmd-bar{background:#fff;border-bottom:1px solid #edebe9;padding:0 12px;display:flex;align-items:center;gap:1px;height:44px;flex-shrink:0;overflow-x:auto;white-space:nowrap}
+.cmd-bar::-webkit-scrollbar{height:0}
+.cmd-sep{width:1px;height:18px;background:#edebe9;margin:0 3px;flex-shrink:0}
+.cb{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:2px;background:transparent;border:none;cursor:pointer;font-size:12px;color:#605e5c;white-space:nowrap;font-family:inherit}
+.cb:hover{background:#f3f2f1;color:#201f1e}
+.cb svg{width:13px;height:13px;flex-shrink:0}
+.cb.primary{background:#0078d4;color:#fff;border:none}
+.cb.primary:hover{background:#005a9e}
+.cb-spacer{flex:1;min-width:8px}
+
+/* ── INBOX EMPTY STATE ── */
+.inbox-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:8px;padding:60px 20px;text-align:center}
+.inbox-empty svg{width:48px;height:48px;color:#c8c6c4;margin-bottom:8px}
+.inbox-empty h3{font-size:16px;font-weight:600;color:#201f1e}
+.inbox-empty p{font-size:13px;color:#605e5c;max-width:340px;line-height:1.5}
+
+/* ── CASE DETAIL ── */
+.det-wrap{display:flex;flex-direction:column;height:100%}
+.det-title-bar{background:#fff;border-bottom:1px solid #edebe9;padding:8px 16px 0;flex-shrink:0}
+.det-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:6px}
+.det-title-text{font-size:16px;font-weight:600;color:#201f1e;line-height:1.3}
+.det-saved{font-size:12px;color:#605e5c;font-weight:400;margin-left:8px}
+.det-meta-row{display:flex;align-items:center;gap:0;font-size:12px;color:#605e5c;margin-bottom:8px;flex-wrap:wrap;gap:4px}
+.det-meta-item{display:flex;align-items:center;gap:4px;padding-right:12px;border-right:1px solid #edebe9;margin-right:8px}
+.det-meta-item:last-child{border-right:none}
+.det-meta-label{color:#a19f9d;margin-right:2px}
+.det-owner-avatar{width:24px;height:24px;border-radius:50%;background:#0078d4;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.det-tabs-row{display:flex;align-items:flex-end;justify-content:space-between}
+.det-tabs{display:flex;gap:0}
+.det-tab{padding:8px 14px 8px;cursor:pointer;border:none;background:transparent;font-size:13px;color:#605e5c;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.det-tab:hover{color:#201f1e;background:#f3f2f1}
+.det-tab.active{color:#0078d4;font-weight:600;border-bottom-color:#0078d4}
+.det-form-assist{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:2px;background:transparent;border:1px solid #edebe9;cursor:pointer;font-size:12px;color:#605e5c;white-space:nowrap;margin-bottom:6px}
+.det-form-assist:hover{background:#f3f2f1}
+.det-form-assist svg{width:13px;height:13px}
+.ai-bar{display:flex;align-items:center;justify-content:space-between;background:#eff6fc;border:1px dashed #c7e0f4;border-radius:2px;padding:6px 14px;margin:10px 16px 0;font-size:12px;color:#0078d4;gap:8px;flex-shrink:0}
+.ai-bar-left{display:flex;align-items:center;gap:6px}
+.ai-bar-right{display:flex;align-items:center;gap:6px;color:#605e5c}
+.ai-bar svg{width:13px;height:13px;flex-shrink:0}
+
+/* ── FORM CONTENT ── */
+.det-content{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.det-cols{display:grid;grid-template-columns:1fr 360px;flex:1;overflow:hidden;padding:12px 16px;gap:12px}
+.form-card{background:#fff;border:1px solid #edebe9;border-radius:8px;display:flex;flex-direction:column;overflow-y:auto;min-height:0;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.form-card::-webkit-scrollbar{width:4px}
+.form-card::-webkit-scrollbar-thumb{background:#c8c6c4;border-radius:4px}
+.activities-section{padding:12px 16px;border-bottom:1px solid #edebe9}
+.activities-title{font-size:13px;font-weight:600;color:#201f1e;margin-bottom:8px}
+.activities-table{border:1px solid #edebe9;border-radius:6px;overflow:hidden}
+.activities-table-hd{background:#f3f2f1;padding:6px 12px;font-size:12px;font-weight:600;color:#605e5c;border-bottom:1px solid #edebe9}
+.activities-table-row{padding:10px 12px;font-size:12px;color:#a19f9d;text-align:center}
+.ff-section{padding:4px 16px 12px}
+.ff-row{display:flex;align-items:flex-start;padding:7px 0;border-bottom:1px solid #f3f2f1;min-height:34px;gap:0}
+.ff-row:last-child{border-bottom:none}
+.ff-label{width:140px;flex-shrink:0;font-size:12px;color:#605e5c;padding-top:6px;line-height:1.3;font-weight:400}
+.ff-label .req{color:#a4262c;margin-left:2px}
+.ff-val{flex:1;min-width:0}
+.ff-input{width:100%;padding:4px 8px;background:transparent;border:none;border-bottom:1px solid transparent;font-size:13px;color:#201f1e;font-family:inherit;outline:none;border-radius:0}
+.ff-input:hover{border-bottom-color:#c8c6c4}
+.ff-input:focus{border-bottom-color:#0078d4;background:#faf9f8}
+.ff-input.multiline{min-height:72px;resize:none;line-height:1.55}
+.ff-plain{padding:5px 8px;font-size:13px;color:#201f1e;line-height:1.4}
+.ff-chip-wrap{display:flex;align-items:center;gap:6px;padding:3px 8px}
+.ff-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px 2px 10px;background:#eff6fc;border:1px solid #c7e0f4;border-radius:12px;font-size:12px;color:#0078d4}
+.ff-chip-x{background:transparent;border:none;cursor:pointer;color:#0078d4;font-size:14px;line-height:1;padding:0 2px}
+.ff-chip-x:hover{color:#a4262c}
+.ff-chip-search{width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;cursor:pointer;color:#605e5c;border-radius:4px;flex-shrink:0}
+.ff-chip-search:hover{background:#f3f2f1}
+.ff-chip-search svg{width:13px;height:13px}
+.ff-dropdown{display:flex;align-items:center;gap:8px;padding:5px 8px;cursor:pointer;border:1px solid #edebe9;background:#fff;font-size:13px;color:#201f1e;font-family:inherit;text-align:left;border-radius:6px;width:auto;max-width:180px}
+.ff-dropdown:hover{background:#f3f2f1;border-color:#c8c6c4}
+.ff-dropdown svg{width:12px;height:12px;color:#605e5c;flex-shrink:0;margin-left:4px}
+.ff-dropdown .dd-icon{font-size:13px}
+.ff-agent-status{display:flex;align-items:center;gap:8px;padding:5px 8px;font-size:13px;color:#605e5c}
+.ff-agent-status a{color:#0078d4;cursor:pointer;text-decoration:none}
+.ff-agent-status a:hover{text-decoration:underline}
+.ff-agent-ico{display:flex;align-items:center;justify-content:center;color:#605e5c}
+.ff-agent-ico svg{width:15px;height:15px}
+
+/* ── TIMELINE ── */
+.tl-card{background:#fff;border:1px solid #edebe9;border-radius:8px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.tl-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #edebe9;flex-shrink:0}
+.tl-hd-title{font-size:13px;font-weight:600;color:#201f1e}
+.tl-hd-actions{display:flex;align-items:center;gap:0}
+.tl-ico{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;cursor:pointer;color:#605e5c;border-radius:4px}
+.tl-ico:hover{background:#f3f2f1;color:#201f1e}
+.tl-ico svg{width:14px;height:14px}
+.tl-search{display:flex;align-items:center;gap:8px;margin:10px 12px 0;padding:6px 10px;border:1px solid #edebe9;border-radius:20px;background:#faf9f8}
+.tl-search svg{width:13px;height:13px;color:#a19f9d;flex-shrink:0}
+.tl-search input{background:transparent;border:none;outline:none;font-size:13px;color:#201f1e;font-family:inherit;flex:1}
+.tl-search input::placeholder{color:#a19f9d}
+.tl-note{display:flex;align-items:center;gap:8px;margin:8px 12px 10px;padding:7px 10px;border:1px solid #edebe9;border-radius:8px;background:#fff;cursor:text}
+.tl-note-avatar{width:26px;height:26px;border-radius:50%;background:#0078d4;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tl-note-placeholder{font-size:13px;color:#a19f9d}
+.tl-scroll{flex:1;overflow-y:auto;padding:0 0 8px}
+.tl-scroll::-webkit-scrollbar{width:4px}
+.tl-scroll::-webkit-scrollbar-thumb{background:#c8c6c4;border-radius:4px}
+.tl-section{border-bottom:1px solid #edebe9}
+.tl-section-hd{display:flex;align-items:center;justify-content:space-between;padding:8px 14px 6px;cursor:pointer}
+.tl-section-hd:hover{background:#f8f8f8}
+.tl-section-label{font-size:12px;font-weight:600;color:#201f1e;display:flex;align-items:center;gap:6px}
+.tl-section-label svg{width:13px;height:13px;color:#605e5c}
+.tl-chevron{width:14px;height:14px;color:#605e5c;transition:transform .15s}
+.tl-chevron.open{transform:rotate(180deg)}
+.tl-highlight-info{display:flex;align-items:center;gap:8px;padding:8px 14px 10px;font-size:12px;color:#605e5c}
+.tl-highlight-info svg{width:14px;height:14px;color:#a19f9d;flex-shrink:0}
+.tl-entry{display:flex;align-items:flex-start;gap:9px;padding:10px 14px;border-bottom:1px solid #f3f2f1}
+.tl-entry:last-child{border-bottom:none}
+.tl-entry-avatar{width:28px;height:28px;border-radius:50%;background:#8764b8;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.tl-entry-body{flex:1;min-width:0}
+.tl-entry-time{font-size:11px;color:#a19f9d;margin-bottom:2px}
+.tl-entry-title{font-size:13px;font-weight:600;color:#201f1e;margin-bottom:3px;line-height:1.3}
+.tl-entry-sub{font-size:12px;color:#0078d4;cursor:pointer;margin-bottom:2px}
+.tl-entry-sub:hover{text-decoration:underline}
+.tl-entry-desc{font-size:12px;color:#605e5c;line-height:1.5}
+.tl-entry-actions{display:flex;align-items:center;gap:0;margin-top:4px;opacity:0;transition:opacity .1s}
+.tl-entry:hover .tl-entry-actions{opacity:1}
+.tl-entry-ico{width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;cursor:pointer;color:#a19f9d;border-radius:4px}
+.tl-entry-ico:hover{background:#f3f2f1;color:#605e5c}
+.tl-entry-ico svg{width:13px;height:13px}
+.tl-autopost{display:flex;align-items:flex-start;gap:8px;padding:8px 14px;font-size:11px;color:#a19f9d}
+.tl-autopost svg{width:13px;height:13px;flex-shrink:0;margin-top:1px}
+
+/* ── AGENT COACH BANNER ── */
+.ac-banner{background:#fff;border:1px solid #edebe9;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.ac-banner.mini .ac-tips-wrap,.ac-banner.mini .ac-progress-section,.ac-banner.mini .ac-feedback-row{display:none}
+.ac-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f2f1}
+.ac-hd-l{display:flex;align-items:center;gap:8px}
+.ac-sparkle{width:16px;height:16px;color:#0078d4;flex-shrink:0}
+.ac-title{font-size:13px;font-weight:600;color:#201f1e}
+.ac-live{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:10px;background:#eff6fc;border:1px solid #c7e0f4;font-size:10px;font-weight:600;color:#0078d4}
+.ac-live-dot{width:6px;height:6px;border-radius:50%;background:#0078d4;animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.ac-hd-r{display:flex;align-items:center;gap:2px}
+.ac-ico{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;cursor:pointer;border-radius:4px;color:#605e5c}
+.ac-ico:hover{background:#f3f2f1;color:#201f1e}
+.ac-ico.active{color:#0078d4}
+.ac-ico svg{width:14px;height:14px}
+.ac-progress-section{padding:8px 14px 10px;border-bottom:1px solid #f3f2f1}
+.ac-prog-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.ac-prog-label{font-size:11px;font-weight:600;color:#a19f9d;text-transform:uppercase;letter-spacing:.5px}
+.ac-prog-count{font-size:11px;color:#a19f9d}
+.ac-prog-track{height:4px;background:#edebe9;border-radius:2px;overflow:hidden}
+.ac-prog-fill{height:100%;border-radius:2px;background:#0078d4;transition:width .35s ease}
+.ac-tip-row{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-bottom:1px solid #f3f2f1}
+.ac-tip-row:last-child{border-bottom:none}
+.ac-tip-check{width:18px;height:18px;border-radius:50%;border:1.5px solid #c8c6c4;background:#fff;cursor:pointer;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s;padding:0}
+.ac-tip-check:hover{border-color:#0078d4}
+.ac-tip-check.checked{background:#0078d4;border-color:#0078d4}
+.ac-tip-check.checked svg{display:block}
+.ac-tip-check svg{width:10px;height:10px;color:#fff;display:none}
+.ac-tip-body{flex:1;min-width:0}
+.ac-tip-text{font-size:13px;color:#201f1e;line-height:1.5}
+.ac-tip-text.crossed{text-decoration:line-through;color:#a19f9d}
+.ac-tip-ref{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#0078d4;cursor:pointer;margin-top:4px;font-weight:500;text-decoration:none}
+.ac-tip-ref:hover{text-decoration:underline}
+.ac-tip-ref svg{width:11px;height:11px}
+.ac-tip-about-box{margin-top:7px;padding:8px 10px;background:#faf9f8;border-radius:6px;border:1px solid #edebe9;font-size:12px;color:#605e5c;line-height:1.55}
+.ac-tip-about-tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin-bottom:5px;background:#eff6fc;color:#0078d4;text-transform:uppercase;letter-spacing:.4px}
+.ac-about-btn{flex-shrink:0;display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#605e5c;background:transparent;border:none;cursor:pointer;padding:2px 4px;border-radius:3px;margin-top:1px;white-space:nowrap}
+.ac-about-btn:hover{color:#0078d4;background:#f3f2f1}
+.ac-about-btn svg{width:12px;height:12px;flex-shrink:0}
+.ac-feedback-row{display:flex;align-items:center;gap:8px;padding:9px 14px;border-top:1px solid #f3f2f1;font-size:12px;color:#605e5c}
+.ac-fb-btn{width:26px;height:26px;display:flex;align-items:center;justify-content:center;border:1px solid #edebe9;border-radius:4px;background:#fff;cursor:pointer;color:#605e5c;margin-left:2px}
+.ac-fb-btn:hover{border-color:#0078d4;color:#0078d4;background:#eff6fc}
+.ac-fb-btn.active{border-color:#0078d4;color:#0078d4;background:#eff6fc}
+.ac-fb-btn svg{width:13px;height:13px}
+
+/* ── EMAIL COMPOSE ── */
+.ef-table{background:#fff;flex-shrink:0}
+.ef-row{display:flex;align-items:center;border-bottom:1px solid #f3f2f1;min-height:36px}
+.ef-row:last-child{border-bottom:1px solid #edebe9}
+.ef-label{width:56px;flex-shrink:0;font-size:12px;font-weight:600;color:#a19f9d;padding:0 8px 0 14px}
+.ef-control{flex:1;padding:4px 0;min-width:0;display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.ef-input{border:none;outline:none;font-size:13px;font-family:inherit;color:#201f1e;background:transparent;flex:1;min-width:60px;padding:2px 4px}
+.ef-input::placeholder{color:#c8c6c4}
+.ef-input:focus{background:#faf9f8}
+.ef-search{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;cursor:pointer;color:#a19f9d;flex-shrink:0;border-radius:3px;margin-right:4px}
+.ef-search:hover{background:#f3f2f1;color:#605e5c}
+.ef-search svg{width:13px;height:13px}
+.ef-chip{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;background:#eff6fc;border:1px solid #c7e0f4;border-radius:4px;font-size:12px;color:#201f1e}
+.ef-chip-avatar{width:18px;height:18px;border-radius:50%;background:#8764b8;color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ef-chip-status{font-size:11px;color:#a19f9d}
+.ef-chip-x{background:transparent;border:none;cursor:pointer;color:#a19f9d;font-size:13px;padding:0 2px;line-height:1}
+.ef-chip-x:hover{color:#a4262c}
+/* Rich text toolbar */
+.email-toolbar{display:flex;align-items:center;padding:4px 8px;border-bottom:1px solid #edebe9;background:#fff;flex-shrink:0;gap:2px;overflow-x:auto;white-space:nowrap}
+.email-toolbar::-webkit-scrollbar{height:0}
+.etb-draft{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid #edebe9;border-radius:4px;background:#fff;cursor:pointer;font-size:12px;color:#201f1e;font-family:inherit}
+.etb-draft:hover{background:#f3f2f1}
+.etb-draft svg{width:13px;height:13px;color:#0078d4}
+.etb-sep{width:1px;height:18px;background:#edebe9;margin:0 4px;flex-shrink:0}
+.etb-select{padding:3px 6px;border:1px solid #edebe9;border-radius:3px;font-size:12px;font-family:inherit;color:#201f1e;background:#fff;height:24px}
+.etb-btn{width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;cursor:pointer;color:#605e5c;border-radius:3px;flex-shrink:0;font-size:12px;font-weight:700}
+.etb-btn:hover{background:#f3f2f1}
+.etb-btn svg{width:13px;height:13px}
+/* Body editor */
+.email-body-area{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;background:#fff}
+.email-body-ed{flex:1;overflow-y:auto;padding:14px 16px;font-size:13px;color:#201f1e;line-height:1.65;outline:none;font-family:"Segoe UI",system-ui,sans-serif}
+.email-body-ed::-webkit-scrollbar{width:4px}
+.email-body-ed::-webkit-scrollbar-thumb{background:#c8c6c4;border-radius:2px}
+.email-body-ed p{margin:0 0 10px}
+/* Draft with Copilot floating panel */
+.draft-cop{position:absolute;top:12px;left:12px;width:460px;max-width:calc(100% - 24px);background:#fff;border:1px solid #edebe9;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.14);z-index:20;overflow:hidden}
+.draft-cop-hd{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid #edebe9}
+.draft-cop-title{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:#201f1e}
+.draft-cop-title svg{width:15px;height:15px;color:#0078d4}
+.draft-cop-info{color:#a19f9d;font-size:11px;cursor:pointer}
+.draft-cop-close{width:24px;height:24px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;cursor:pointer;color:#605e5c;border-radius:4px;font-size:16px;line-height:1}
+.draft-cop-close:hover{background:#f3f2f1}
+.draft-cop-tabs{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid #edebe9}
+.draft-cop-tab{padding:5px 10px;border:1px solid #edebe9;border-radius:4px;font-size:12px;color:#605e5c;background:#fff;cursor:pointer;font-family:inherit}
+.draft-cop-tab:hover{background:#f3f2f1}
+.draft-cop-tab.active{background:#eff6fc;border-color:#c7e0f4;color:#0078d4}
+.draft-cop-body{padding:10px 14px 12px}
+.draft-cop-input{width:100%;padding:7px 10px;border:1px solid #edebe9;border-radius:4px;font-size:12px;font-family:inherit;color:#201f1e;background:#faf9f8;outline:none}
+.draft-cop-input:focus{border-color:#0078d4;background:#fff}
+.draft-cop-gen{margin-top:8px;padding:5px 14px;border-radius:4px;font-size:12px;font-family:inherit;cursor:not-allowed;border:1px solid #edebe9;background:#f3f2f1;color:#a19f9d}
+.draft-cop-gen.ready{cursor:pointer;background:#0078d4;color:#fff;border-color:#0078d4}
+.draft-cop-gen.ready:hover{background:#005a9e}
+/* Attachment side panel */
+.email-att-panel{background:#fff;display:flex;flex-direction:column;overflow:hidden}
+.email-att-panel-hd{padding:10px 14px;border-bottom:1px solid #edebe9;font-size:13px;font-weight:600;color:#201f1e;flex-shrink:0}
+.email-att-meta{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;border-bottom:1px solid #edebe9;flex-shrink:0}
+.email-att-count{font-size:12px;color:#605e5c}
+.email-att-controls{display:flex;align-items:center;gap:2px}
+.email-att-ctrl{width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid #edebe9;border-radius:3px;cursor:pointer;color:#605e5c}
+.email-att-ctrl:hover{background:#f3f2f1}
+.email-att-ctrl svg{width:12px;height:12px}
+.email-att-add{display:flex;align-items:center;gap:3px;padding:3px 8px;border:1px solid #edebe9;border-radius:3px;background:#fff;cursor:pointer;font-size:12px;color:#201f1e;font-family:inherit}
+.email-att-add:hover{background:#f3f2f1}
+.email-att-empty{flex:1;display:flex;align-items:center;justify-content:center;font-size:12px;color:#a19f9d;padding:24px;text-align:center}
+/* Email meta bar (Priority / Due / Status / Owner) */
+.email-meta-bar{display:flex;align-items:stretch;border:1px solid #edebe9;border-radius:4px;overflow:hidden;font-size:12px;flex-shrink:0}
+.emc{padding:4px 12px;border-right:1px solid #edebe9;display:flex;flex-direction:column;justify-content:center;min-width:60px}
+.emc:last-child{border-right:none;flex-direction:row;align-items:center;gap:6px;padding:4px 10px 4px 12px}
+.emc-val{font-size:12px;color:#201f1e;font-weight:400;white-space:nowrap}
+.emc-lbl{font-size:10px;color:#a19f9d;margin-top:1px;white-space:nowrap}
+.emc-avatar{width:26px;height:26px;border-radius:50%;background:#0078d4;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+/* Tip-match toast animation */
+@keyframes tip-flash{0%{background:#dff6dd}100%{background:transparent}}
+.ac-tip-row.just-matched{animation:tip-flash .6s ease}
+
+/* ── VIEWS ── */
+.view-pad{padding:16px 20px}
+.v-title{font-size:18px;font-weight:600;color:#201f1e;margin-bottom:2px}
+.v-sub{font-size:13px;color:#a19f9d;margin-bottom:14px}
+.sc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.sc-card{background:#fff;border:1px solid #edebe9;border-radius:8px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.sc-val{font-size:30px;font-weight:700;color:#0078d4;margin-bottom:2px}
+.sc-val.g{color:#107c10}.sc-val.w{color:#ca5010}
+.sc-lbl{font-size:12px;color:#a19f9d}
+.sc-trend{font-size:11px;margin-top:3px}
+.sc-trend.up{color:#107c10}.sc-trend.dn{color:#a4262c}
+.prog-card{background:#fff;border:1px solid #edebe9;border-radius:8px;padding:14px 16px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.prog-title{font-size:13px;font-weight:600;color:#201f1e;margin-bottom:10px}
+.prog-row{margin:7px 0}
+.prog-lr{display:flex;justify-content:space-between;font-size:12px;color:#605e5c;margin-bottom:3px}
+.prog-bar{height:6px;background:#edebe9;border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;background:#0078d4}
+.prog-fill.g{background:#107c10}.prog-fill.w{background:#ca5010}
+.eval-row{background:#fff;border:1px solid #edebe9;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:6px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.eval-row:hover{box-shadow:0 1.6px 3.6px rgba(0,0,0,.1)}
+.es{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.es.h{background:#dff6dd;color:#107c10}.es.m{background:#fff4ce;color:#7a4f00}.es.l{background:#fde7e9;color:#a4262c}
+.e-title{font-size:13px;font-weight:600;color:#201f1e;margin-bottom:1px}
+.e-meta{font-size:11px;color:#a19f9d}
+.e-pill{font-size:11px;font-weight:600;padding:2px 8px;border-radius:8px}
+.e-pill.done{background:#dff6dd;color:#107c10}.e-pill.pend{background:#fff4ce;color:#7a4f00}.e-pill.disp{background:#fde7e9;color:#a4262c}
+.gov-item{background:#fff;border:1px solid #edebe9;border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:flex-start;gap:9px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.gov-ico{width:28px;height:28px;border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.gov-ico.ok{background:#dff6dd}.gov-ico.ok svg{color:#107c10}
+.gov-ico.warn{background:#fff4ce}.gov-ico.warn svg{color:#ca5010}
+.gov-ico svg{width:13px;height:13px}
+.gov-t{font-size:13px;font-weight:600;color:#201f1e;margin-bottom:1px}
+.gov-d{font-size:12px;color:#605e5c;line-height:1.5}
+.play-item{background:#fff;border:1px solid #edebe9;border-radius:8px;margin-bottom:6px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.play-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer}
+.play-hd:hover{background:#f3f2f1}
+.play-hd-l{display:flex;align-items:center;gap:8px}
+.play-num{width:20px;height:20px;border-radius:50%;background:#0078d4;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.play-step{font-size:13px;font-weight:600;color:#201f1e}
+.play-body{padding:0 14px 10px;border-top:1px solid #edebe9}
+.play-body p{font-size:12px;color:#605e5c;line-height:1.6;margin-top:8px}
+.play-tip{display:flex;align-items:flex-start;gap:5px;font-size:12px;color:#605e5c;margin-top:4px;line-height:1.4}
+
+/* ── COPILOT PANEL ── */
+#cop-panel{width:0;background:#fff;border-left:1px solid #edebe9;flex-shrink:0;overflow:hidden;transition:width .2s ease;display:flex;flex-direction:column}
+#cop-panel.open{width:340px}
+.cp-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #edebe9;flex-shrink:0}
+.cp-hd-title{font-size:14px;font-weight:600;color:#201f1e}
+.cp-close{width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;cursor:pointer;color:#605e5c;border-radius:2px}
+.cp-close:hover{background:#f3f2f1}
+.cp-tabs{display:flex;border-bottom:1px solid #edebe9;flex-shrink:0}
+.cp-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;height:38px;border:none;background:transparent;cursor:pointer;font-size:12px;color:#a19f9d;border-bottom:2px solid transparent}
+.cp-tab:hover{background:#f3f2f1;color:#201f1e}
+.cp-tab.active{color:#0078d4;font-weight:600;border-bottom-color:#0078d4}
+.cp-scroll{flex:1;overflow-y:auto;padding:12px}
+.cp-scroll::-webkit-scrollbar{width:4px}
+.cp-scroll::-webkit-scrollbar-thumb{background:#c8c6c4;border-radius:2px}
+.cp-card{background:#f3f2f1;border-radius:8px;padding:9px 10px;margin-bottom:8px}
+.cp-lbl{font-size:10px;font-weight:700;color:#605e5c;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.cp-txt{font-size:12px;color:#201f1e;line-height:1.5}
+.cp-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.cp-chip{padding:3px 9px;border-radius:10px;border:1px solid #0078d4;color:#0078d4;font-size:11px;cursor:pointer;background:#fff}
+.cp-chip:hover{background:#deecf9}
+.cp-input-wrap{padding:9px 12px;border-top:1px solid #edebe9;flex-shrink:0}
+.cp-input{width:100%;padding:6px 10px;border:1px solid #edebe9;border-radius:2px;font-size:12px;font-family:inherit;background:#f3f2f1;color:#201f1e;outline:none}
+.cp-input:focus{border-color:#0078d4;background:#fff}
+
+/* ── PLACEHOLDER ── */
+.placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:8px;padding:60px 20px;text-align:center;min-height:300px}
+.ph-ico{width:52px;height:52px;border-radius:6px;background:#deecf9;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+.ph-ico svg{width:26px;height:26px;color:#0078d4}
+.ph-title{font-size:16px;font-weight:600;color:#201f1e}
+.ph-sub{font-size:13px;color:#605e5c;max-width:340px;line-height:1.5}
+.ph-btn{padding:6px 16px;border-radius:6px;background:#0078d4;color:#fff;border:none;cursor:pointer;font-size:13px;margin-top:4px;font-family:inherit}
+.ph-btn:hover{background:#005a9e}
+
+/* util */
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<div id="top-nav">
+  <div class="tn-left">
+    <button class="tn-ico" onclick="showToast('App launcher')">
+      <svg viewBox="0 0 20 20" fill="currentColor"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="12" y="3" width="5" height="5" rx="1"/><rect x="3" y="12" width="5" height="5" rx="1"/><rect x="12" y="12" width="5" height="5" rx="1"/></svg>
+    </button>
+    <div class="tn-brand">
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 1L19 5.5v9L10 19 1 14.5v-9L10 1z" fill="#0078d4"/><path d="M10 4.5L16 7.5v5L10 15.5 4 12.5v-5L10 4.5z" fill="rgba(255,255,255,.2)"/></svg>
+      Dynamics 365
+    </div>
+    <div class="tn-sep"></div>
+    <span class="tn-app">Copilot Service Workspace</span>
+  </div>
+  <div class="tn-center">
+    <div class="tn-search">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.5 12.5l4 4" stroke-linecap="round"/></svg>
+      <input placeholder="Search" onkeydown="if(event.key==='Enter')showToast('Searching…')"/>
+    </div>
+  </div>
+  <div class="tn-right">
+    <button class="tn-ico" title="Lightning" onclick="showToast('Suggested actions')">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M11 2L4 11h6l-1 7 7-9h-6z"/></svg>
+    </button>
+    <button class="tn-ico" title="New" onclick="showToast('New record')">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 4v12M4 10h12" stroke-linecap="round"/></svg>
+    </button>
+    <button class="tn-ico" title="Settings" onclick="showToast('Settings')">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M8.5 2h3l.5 1.9a5.9 5.9 0 011.3.7l1.8-.6 1.5 2.6-1.4 1.4a5.7 5.7 0 010 1.8l1.4 1.4-1.5 2.6-1.8-.6a5.9 5.9 0 01-1.3.7L11.5 16h-3l-.5-1.9a5.9 5.9 0 01-1.3-.7l-1.8.6-1.5-2.6 1.4-1.4a5.7 5.7 0 010-1.8L3.6 6.8l1.5-2.6 1.8.6A5.9 5.9 0 018 4.1L8.5 2zm1.5 5a3 3 0 100 6 3 3 0 000-6z"/></svg>
+    </button>
+    <button class="tn-ico" title="Help" onclick="showToast('Help')">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm0 12.5a1 1 0 110-2 1 1 0 010 2zm1.1-4.5H9v-.8c0-1.1 2.5-1.5 2.5-2.9 0-.8-.7-1.3-1.5-1.3s-1.5.5-1.5 1.3H7C7 5.9 8.3 5 10 5s3 1 3 2.6c0 1.8-1.9 2.3-1.9 2.9v.5z"/></svg>
+    </button>
+    <button class="tn-ico" title="Call" onclick="showToast('Call')">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M14.5 12.5c-.9-.1-1.7-.4-2.5-.7l-1.5 1.5a11.5 11.5 0 01-4.3-4.3l1.5-1.5c-.3-.8-.6-1.6-.7-2.5H5a1 1 0 00-1 1A11 11 0 0015 17a1 1 0 001-1v-2.5a1 1 0 00-1.5-.9z"/></svg>
+    </button>
+    <button class="tn-ico" title="Status" onclick="showToast('Status')">
+      <svg viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="4" fill="#107c10"/><circle cx="10" cy="10" r="7.5" fill="none" stroke="#107c10" stroke-width="1.5" opacity=".4"/></svg>
+    </button>
+    <div class="tn-avatar" onclick="showToast('Jessica Li')">JL</div>
+  </div>
+</div>
+
+<!-- SESSION TABS -->
+<div id="session-tabs">
+  <button class="st-hamburger" onclick="toggleSideNav()" title="Navigation">
+    <svg viewBox="0 0 20 20" fill="currentColor"><rect x="2" y="4.5" width="16" height="1.5" rx=".75"/><rect x="2" y="9.25" width="16" height="1.5" rx=".75"/><rect x="2" y="14" width="16" height="1.5" rx=".75"/></svg>
+  </button>
+  <button class="st-tab" id="tab-home" onclick="switchSession('home')">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2.5L2 9h2.5v8h4v-5h3v5h4V9H18L10 2.5z"/></svg>
+    Home
+  </button>
+  <button class="st-tab active" id="tab-inbox" onclick="switchSession('inbox')">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 5h16v1.5L10 12 2 6.5V5zm0 3l8 5 8-5V15H2V8z"/></svg>
+    Inbox
+  </button>
+  <div id="item-tabs"></div>
+</div>
+
+<!-- APP BODY -->
+<div id="app-body">
+
+  <!-- Nav overlay + drawer -->
+  <div id="nav-backdrop" onclick="closeSideNav()"></div>
+  <nav id="side-nav">
+    <div class="snav-hd">
+      <button class="snav-close" onclick="closeSideNav()">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5L5 15M5 5l10 10" stroke-linecap="round"/></svg>
+      </button>
+      <span class="snav-title">Copilot Service Workspace</span>
+    </div>
+    <div class="snav-scroll">
+      <div class="snav-section">Get Started</div>
+      <button class="snav-item" onclick="navigate('home');closeSideNav()" id="sn-home">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2.5L2 9h2.5v8h4v-5h3v5h4V9H18L10 2.5z"/></svg>Home
+      </button>
+      <div class="snav-section" style="margin-top:4px">Quality Management</div>
+      <button class="snav-item" onclick="navigate('scorecard');closeSideNav()" id="sn-scorecard">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 15h14v1.5H3V15zm0-4h9v1.5H3V11zm0-4h14v1.5H3V7zm0-4h9v1.5H3V3z"/></svg>Representative Scorecard
+      </button>
+      <button class="snav-item" onclick="navigate('proactive-activities');closeSideNav()" id="sn-pac">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2,14 7,9 11,12 18,5"/><polyline points="14,5 18,5 18,9"/></svg>Proactive Coaching Activities
+      </button>
+      <button class="snav-item" onclick="navigate('provide-coaching');closeSideNav()" id="sn-pc">
+        <svg viewBox="0 0 20 20" fill="currentColor"><circle cx="9" cy="7" r="4"/><path d="M1 18a8 8 0 0116 0"/></svg>Provide Proactive Coaching
+      </button>
+      <button class="snav-item" onclick="navigate('governance');closeSideNav()" id="sn-gov">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.5L2 5v4c0 4.4 3.4 8.5 8 9.5 4.6-1 8-5.1 8-9.5V5L10 1.5z"/></svg>Governance
+      </button>
+      <button class="snav-item" onclick="navigate('playbook');closeSideNav()" id="sn-play">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M4 2h12a1 1 0 011 1v14a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1zm2 3v2h8V5H6zm0 4v2h8V9H6zm0 4v1.5h5V13H6z"/></svg>Agent Coach Playbook
+      </button>
+      <button class="snav-item" onclick="navigate('evaluations');closeSideNav()" id="sn-eval">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M4 4h12v1.5H4V4zm0 3.5h12V9H4V7.5zm0 3.5h8v1.5H4V11zm0 3.5h8V16H4v-1.5z"/></svg>Evaluations
+      </button>
+      <button class="snav-item" onclick="navigate('eval-criteria');closeSideNav()" id="sn-ec">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 16h14v-1.5H3V16zm1.5-3.5h2V7h-2v5.5zm3.5 0h2V4H8v8.5zm3.5 0h2V9h-2v3.5zm3.5 0h2V5.5h-2v7z"/></svg>Evaluation Criteria
+      </button>
+      <button class="snav-item" onclick="navigate('eval-plans');closeSideNav()" id="sn-ep">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="1.5"/><path d="M7 2v3M13 2v3M3 9h14"/></svg>Evaluation Plans
+      </button>
+      <button class="snav-item" onclick="navigate('supervisor-scorecard');closeSideNav()" id="sn-ss">
+        <svg viewBox="0 0 20 20" fill="currentColor"><circle cx="8" cy="6" r="3"/><path d="M2 16a6 6 0 0112 0"/></svg>Supervisor Scorecard
+      </button>
+      <div class="snav-section" style="margin-top:4px">Operations</div>
+      <button class="snav-item" onclick="navigate('cases');closeSideNav()" id="sn-cases">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 3h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2zm2 4v1.5h6V7H7zm0 3v1.5h6V10H7z"/></svg>Cases
+      </button>
+      <button class="snav-item" onclick="navigate('knowledge');closeSideNav()" id="sn-kb">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 2h7l4 4v12a1 1 0 01-1 1H5a1 1 0 01-1-1V3a1 1 0 011-1zm7 0v4h4"/></svg>Knowledge Articles
+      </button>
+      <button class="snav-item" onclick="navigate('email-templates');closeSideNav()" id="sn-et">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm2 0l6 5 6-5v10H4V5z"/></svg>Email Templates
+      </button>
+      <button class="snav-item" onclick="navigate('service-activities');closeSideNav()" id="sn-sa">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="16" height="13" rx="1.5"/><path d="M14 2v4M6 2v4M2 10h16"/></svg>Service Activities
+      </button>
+      <div class="snav-section" style="margin-top:4px">Customer Support</div>
+      <button class="snav-item" onclick="navigate('digital-chat');closeSideNav()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M4 3h12a2 2 0 012 2v8a2 2 0 01-2 2H7l-3 3V5a2 2 0 012-2z"/></svg>Digital Chat
+      </button>
+      <button class="snav-item" onclick="navigate('voice-calls');closeSideNav()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M14.5 12.5c-.9-.1-1.7-.4-2.5-.7l-1.5 1.5a11.5 11.5 0 01-4.3-4.3l1.5-1.5c-.3-.8-.6-1.6-.7-2.5H5A1 1 0 004 6a11 11 0 0011 11 1 1 0 001-1v-2.5z"/></svg>Voice Calls
+      </button>
+      <div class="snav-section" style="margin-top:4px">Workforce Management</div>
+      <button class="snav-item" onclick="navigate('shift-summary');closeSideNav()">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.5l3 3" stroke-linecap="round"/></svg>Shift Summary
+      </button>
+      <button class="snav-item" onclick="navigate('adherence');closeSideNav()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><circle cx="8" cy="6" r="3"/><path d="M2 15.5a6 6 0 0112 0H2z"/></svg>Adherence Tracker
+      </button>
+      <button class="snav-item" onclick="navigate('forecasting');closeSideNav()">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2,15 7,10 11,13 18,6"/></svg>Forecasting
+      </button>
+      <div style="height:12px"></div>
+    </div>
+  </nav>
+
+  <!-- INBOX PANE -->
+  <div id="inbox-pane">
+    <div id="pane-toggle" onclick="toggleInboxPane()" title="Collapse">
+      <svg id="pane-toggle-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 5l-5 5 5 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="ip-header">
+      <span class="ip-title" id="ip-title-label">My work items</span>
+      <div class="ip-icons">
+        <button class="ip-ico" title="Filter / Views" onclick="toggleInboxNav()"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 4h16v2L12 12v6l-4-2v-4L2 6V4z"/></svg></button>
+        <button class="ip-ico" title="Refresh" onclick="showToast('Refreshed')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 10a6 6 0 0110.2-4.3M16 10a6 6 0 01-10.2 4.3M16 6v4h-4M4 14v-4h4" stroke-linecap="round"/></svg></button>
+        <button class="ip-ico" title="More" onclick="showToast('More options')"><svg viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="5" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="10" cy="15" r="1.5"/></svg></button>
+      </div>
+    </div>
+    <div class="ip-nav-flyout" id="ip-nav-flyout">
+      <div class="ip-nav-item active" id="ipnav-my" onclick="setInboxSection('my');toggleInboxNav()">
+        <div class="ip-nav-left">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="15" height="15"><path d="M2 5h16v1.5L10 12 2 6.5V5zm0 3l8 5 8-5V15H2V8z"/></svg>
+          My work items
+        </div>
+        <span class="ip-nav-badge">9+</span>
+      </div>
+      <div class="ip-nav-item" id="ipnav-closed" onclick="setInboxSection('closed');toggleInboxNav()">
+        <div class="ip-nav-left">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="15" height="15"><path d="M4 3h12v1.5H4V3zm0 3h12v1.5H4V6zm0 3h8v1.5H4V9zm0 3h12v1.5H4v-1.5zm0 3h8V18H4v-1.5z" opacity=".5"/><path d="M14 11l1.5 1.5 3-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Closed work items
+        </div>
+        <span class="ip-nav-badge gray">9+</span>
+      </div>
+      <div class="ip-nav-item" id="ipnav-open" onclick="setInboxSection('open');toggleInboxNav()">
+        <div class="ip-nav-left">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" width="15" height="15"><path d="M2 10h16M10 4l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Open work items
+        </div>
+      </div>
+    </div>
+    <div class="ip-group-row">
+      <span class="ip-group-label" id="ip-group-label">Last week</span>
+      <span class="ip-list-count" id="ip-item-count">5 items</span>
+    </div>
+    <div class="ip-scroll" id="ip-list"></div>
+    <div class="ip-footer" id="ip-footer">5 items · Last updated at 9:14 AM</div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="main-content">
+    <div class="main-scroll" id="main-scroll"></div>
+  </div>
+
+  <!-- COPILOT PANEL -->
+  <aside id="cop-panel">
+    <div class="cp-hd">
+      <span class="cp-hd-title">Copilot</span>
+      <button class="cp-close" onclick="toggleCopilot()">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 5L5 15M5 5l10 10" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="cp-tabs">
+      <button class="cp-tab active" id="cpt-cop" onclick="switchCopTab('copilot')">
+        <svg width="13" height="13" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm1 11H9V9h2v4zm0-6H9V5h2v2z"/></svg>Copilot
+      </button>
+      <button class="cp-tab" id="cpt-team" onclick="switchCopTab('teams')">
+        <svg width="13" height="13" viewBox="0 0 20 20" fill="currentColor"><path d="M12.5 4a2 2 0 11-4 0 2 2 0 014 0zM7 8a3 3 0 016 0v5.5H7V8z"/></svg>Teams
+      </button>
+    </div>
+    <div class="cp-scroll" id="cop-body"></div>
+    <div class="cp-input-wrap">
+      <input class="cp-input" placeholder="Ask Copilot anything…" onkeydown="if(event.key==='Enter')showToast('Copilot is thinking…')"/>
+    </div>
+  </aside>
+
+</div>
+
+<div id="toast" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);background:#323130;color:#fff;padding:6px 14px;border-radius:2px;font-size:13px;opacity:0;transition:all .22s;pointer-events:none;z-index:9999;white-space:nowrap"></div>
+
+<script>
+// ── DATA ──
+const CASES = [
+  {id:'case-001',type:'case',caseNum:'CAS-10042',
+   subject:'Customer unable to access portal — login issues',
+   from:'Marcus T.',company:'Northwind Traders',
+   priority:'Normal',status:'Active',dateGroup:'Today',time:'Fri 3/28',unread:true,
+   product:'Customer Portal',channel:'Web',queue:'Tier 1 Support',
+   owner:'Jessica Li',ownerInitials:'JL',
+   coachInsight:{
+     sentiment:'Frustrated (high)',sentimentColor:'#a4262c',
+     guidance:'Authentication issues have 78% faster resolution when KB article #4521 is referenced early.',
+     suggestion:'Acknowledge frustration, verify account status, escalate if unresolved in 8 min.',
+     compliance:'Verify identity before sharing account details — required by Security Policy SP-12.',complianceType:'warn',
+     evaluation:'Empathy + Technical Accuracy weighted at 40% in your current evaluation plan.',
+   }},
+  {id:'email-001',type:'email',
+   subject:'RE: Billing dispute for invoice #4521',
+   from:'Sandra K.',company:'Contoso Ltd.',
+   priority:'Normal',status:'Draft',dateGroup:'Today',time:'Thu 3/27',unread:false,
+   product:'Billing',channel:'Email',queue:'Billing Queue',
+   owner:'Jessica Li',ownerInitials:'JL',
+   coachInsight:{
+     sentiment:'Neutral-firm',sentimentColor:'#ca5010',
+     guidance:'Billing disputes resolved in under 10 min receive 22% higher CSAT scores.',
+     suggestion:'Pull contract #CT-4821, compare line items, offer credit memo if discrepancy confirmed.',
+     compliance:'Document dispute outcome in case notes within 30 min per Finance Policy FP-08.',complianceType:'warn',
+     evaluation:'Resolution Speed and Documentation Accuracy are top-weighted criteria.',
+   }},
+  {id:'case-002',type:'case',caseNum:'CAS-10038',
+   subject:'Product return request — damaged item on delivery',
+   from:'James R.',company:'Adventure Works',
+   priority:'Normal',status:'Active',dateGroup:'Last week',time:'Thu 3/26',unread:true,
+   product:'Hardware',channel:'Phone',queue:'Returns',
+   owner:'Jessica Li',ownerInitials:'JL',
+   coachInsight:{
+     sentiment:'Disappointed',sentimentColor:'#a4262c',
+     guidance:'Offering a proactive apology in first response improves CSAT by 18% on damage cases.',
+     suggestion:'Apologize, initiate return label via self-service portal, set 48h follow-up.',
+     compliance:'Return processed within SLA of 3 business days per Returns Policy RP-02.',complianceType:'ok',
+     evaluation:'Empathy score is a primary criterion — aim for 5/5 on acknowledgment.',
+   }},
+  {id:'email-002',type:'email',
+   subject:'Subscription cancellation request',
+   from:'Priya M.',company:'Fabrikam Inc.',
+   priority:'Low',status:'Active',dateGroup:'Last week',time:'Thu 3/26',unread:true,
+   product:'Subscriptions',channel:'Email',queue:'Retention',
+   owner:'Jessica Li',ownerInitials:'JL',
+   coachInsight:{
+     sentiment:'Decided-calm',sentimentColor:'#0078d4',
+     guidance:'Save rate increases to 31% when retention offer is made within first response.',
+     suggestion:'Acknowledge request, present Pause/Downgrade options before cancelling.',
+     compliance:'Cancellations require supervisor approval if ARR > $50K. Verify before proceeding.',complianceType:'warn',
+     evaluation:'Retention Attempt is tracked as an evaluation criterion in your plan.',
+   }},
+  {id:'case-003',type:'case',caseNum:'CAS-10031',
+   subject:'Software installation failure on Windows 11',
+   from:'Kevin L.',company:'Tailspin Toys',
+   priority:'Normal',status:'Active',dateGroup:'Last week',time:'Wed 3/25',unread:false,
+   product:'Desktop App v4.2',channel:'Chat',queue:'Tier 2 Technical',
+   owner:'Jessica Li',ownerInitials:'JL',
+   coachInsight:{
+     sentiment:'Stressed',sentimentColor:'#a4262c',
+     guidance:'Error 0x80070005 is covered in KB-8812 — resolves 91% of cases without escalation.',
+     suggestion:'Run KB-8812 checklist: admin rights, antivirus exclusion, .NET version check.',
+     compliance:'Escalation requires Tier 2 handoff note filled. Check escalation form is complete.',complianceType:'ok',
+     evaluation:'Technical Accuracy and First Contact Resolution are weighted at 50% combined.',
+   }},
+];
+
+// ── STATE ──
+let state = {
+  session:'inbox',
+  view:'inbox',
+  selectedItem:null,
+  inboxSection:'my',
+  inboxCollapsed:false,
+  detailTab:'summary',
+  bannerMinimized:false,
+  copilotOpen:false,
+  copilotTab:'copilot',
+  navItem:null,
+  acChecked:{},    // { itemId: [bool×5] }
+  acExpanded:{},   // { 'itemId-idx': bool }
+  acFeedback:{},   // { itemId: 'up'|'down'|null }
+};
+
+// ── INBOX PANE ──
+function renderInboxPane() {
+  const sec = state.inboxSection;
+  let items = sec==='closed' ? [] : CASES;
+  document.getElementById('ip-item-count').textContent = items.length+' items';
+  document.getElementById('ip-footer').textContent = items.length+' items · Last updated at 9:14 AM';
+
+  ['my','closed','open'].forEach(s=>{
+    document.getElementById('ipnav-'+s)?.classList.toggle('active', s===sec);
+  });
+
+  const groups = {};
+  items.forEach(c=>{
+    if(!groups[c.dateGroup]) groups[c.dateGroup]=[];
+    groups[c.dateGroup].push(c);
+  });
+
+  let html='';
+  if(sec==='closed'){
+    html='<div style="padding:20px 12px;font-size:12px;color:#a19f9d;text-align:center">No closed work items</div>';
+  } else if(sec==='open'){
+    items = CASES.filter(c=>c.status!=='Draft');
+    groups['Open']=items;
+    html='<div style="padding:6px 12px 4px;font-size:12px;font-weight:600;color:#605e5c">Open</div>';
+    items.forEach(item=>{html+=makeWiCard(item);});
+  } else {
+    Object.entries(groups).forEach(([g,grpItems])=>{
+      html+=`<div style="padding:7px 12px 3px;font-size:12px;font-weight:600;color:#605e5c;border-top:1px solid #f3f2f1">${g}</div>`;
+      grpItems.forEach(item=>{html+=makeWiCard(item);});
+    });
+  }
+  document.getElementById('ip-list').innerHTML = html;
+}
+
+function makeWiCard(item) {
+  const sel = state.selectedItem && state.selectedItem.id===item.id ? 'selected' : '';
+  const typeClass = item.type==='case' ? 'case-icon' : 'email-icon';
+  const typeIco = item.type==='case'
+    ? `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 3h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2zm2 4v1.5h6V7H7zm0 3v1.5h6V10H7z"/></svg>`
+    : `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 5h16v1.5L10 12 2 6.5V5zm0 3l8 5 8-5V15H2V8z"/></svg>`;
+  const caseNumLine = item.caseNum ? `<div class="wi-casenum">${item.caseNum}</div>` : '';
+  return `
+  <div class="wi-item ${sel}" onclick="openItem('${item.id}')">
+    <div class="wi-unread-col">${item.unread?'<div class="wi-dot"></div>':''}</div>
+    <div class="wi-type-icon ${typeClass}">${typeIco}</div>
+    <div class="wi-body">
+      <div class="wi-title">${item.subject}</div>
+      ${caseNumLine}
+      <div class="wi-customer">Customer: ${item.from}</div>
+      <div class="wi-meta">${item.status} · ${item.priority} · ${item.time}</div>
+    </div>
+  </div>`;
+}
+
+// ── SESSION TABS ──
+function updateSessionTabs() {
+  document.getElementById('tab-home').classList.toggle('active', state.session==='home');
+  document.getElementById('tab-inbox').classList.toggle('active', state.session==='inbox');
+
+  const wrap = document.getElementById('item-tabs');
+  if(state.selectedItem) {
+    const it = state.selectedItem;
+    const isActive = state.session===it.id ? 'active' : '';
+    const shortTitle = it.subject.length>28 ? it.subject.slice(0,28)+'…' : it.subject;
+    const ico = it.type==='case'
+      ? `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 3h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2zm2 4v1.5h6V7H7zm0 3v1.5h6V10H7z"/></svg>`
+      : `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 5h16v1.5L10 12 2 6.5V5zm0 3l8 5 8-5V15H2V8z"/></svg>`;
+    wrap.innerHTML = `
+      <button class="st-tab ${isActive}" onclick="switchSession('${it.id}')">
+        ${ico}
+        <span style="max-width:160px;overflow:hidden;text-overflow:ellipsis">${shortTitle}</span>
+        <button class="st-close" onclick="closeItemTab(event)">×</button>
+      </button>`;
+    if(state.session===it.id) {
+      document.getElementById('tab-inbox').classList.remove('active');
+      document.getElementById('tab-home').classList.remove('active');
+    }
+  } else {
+    wrap.innerHTML='';
+  }
+}
+
+function switchSession(s) {
+  state.session = s;
+  if(s==='home') { state.view='home'; state.selectedItem=null; }
+  else if(s==='inbox') { state.view='inbox'; }
+  else {
+    const item = CASES.find(c=>c.id===s);
+    if(item) { state.selectedItem=item; state.view='detail'; }
+  }
+  render();
+}
+
+function closeItemTab(e) {
+  e.stopPropagation();
+  state.selectedItem=null;
+  state.session='inbox';
+  state.view='inbox';
+  render();
+}
+
+// ── NAVIGATION ──
+function navigate(view) {
+  state.view=view;
+  state.session=view==='home'?'home':'inbox';
+  state.selectedItem=null;
+  state.bannerMinimized=false;
+  document.querySelectorAll('#side-nav .snav-item').forEach(el=>el.classList.remove('active'));
+  const m={'home':'sn-home','scorecard':'sn-scorecard','evaluations':'sn-eval','governance':'sn-gov','playbook':'sn-play','cases':'sn-cases'};
+  if(m[view]) document.getElementById(m[view])?.classList.add('active');
+  render();
+}
+
+function openItem(id) {
+  const item = CASES.find(c=>c.id===id);
+  if(!item) return;
+  state.selectedItem=item;
+  state.session=item.id;
+  state.view='detail';
+  state.detailTab='summary';
+  state.bannerMinimized = false;
+  render();
+}
+
+function setDetailTab(tab) {
+  state.detailTab=tab;
+  render();
+}
+
+function setInboxSection(s) {
+  state.inboxSection=s;
+  const labels={'my':'My work items','closed':'Closed work items','open':'Open work items'};
+  const lbl=document.getElementById('ip-title-label');
+  if(lbl) lbl.textContent=labels[s]||'My work items';
+  renderInboxPane();
+}
+
+function toggleInboxNav() {
+  const flyout=document.getElementById('ip-nav-flyout');
+  if(flyout) flyout.classList.toggle('open');
+}
+
+// ── PANEL TOGGLES ──
+function toggleSideNav() {
+  document.getElementById('side-nav').classList.toggle('open');
+  document.getElementById('nav-backdrop').style.display = document.getElementById('side-nav').classList.contains('open')?'block':'none';
+}
+function closeSideNav() {
+  document.getElementById('side-nav').classList.remove('open');
+  document.getElementById('nav-backdrop').style.display='none';
+}
+function toggleInboxPane() {
+  state.inboxCollapsed = !state.inboxCollapsed;
+  const pane = document.getElementById('inbox-pane');
+  pane.classList.toggle('collapsed', state.inboxCollapsed);
+  const ico = document.getElementById('pane-toggle-ico');
+  ico.style.transform = state.inboxCollapsed ? 'rotate(180deg)' : '';
+}
+function toggleCopilot() {
+  state.copilotOpen=!state.copilotOpen;
+  document.getElementById('cop-panel').classList.toggle('open', state.copilotOpen);
+  if(state.copilotOpen) renderCopilot();
+}
+function switchCopTab(t) {
+  state.copilotTab=t;
+  document.getElementById('cpt-cop').classList.toggle('active',t==='copilot');
+  document.getElementById('cpt-team').classList.toggle('active',t==='teams');
+  renderCopilot();
+}
+function toggleBanner() {
+  state.bannerMinimized=!state.bannerMinimized;
+  document.querySelector('.ac-banner')?.classList.toggle('mini',state.bannerMinimized);
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(16px)'},2200);
+}
+
+// ── AGENT COACH TIPS ──
+function getTips(item) {
+  const ci = item.coachInsight;
+  return [
+    { text: ci.compliance,
+      ref: item.caseNum || null,
+      why: 'This requirement is mandated by your organization\'s compliance framework. Non-compliance may result in a policy violation flag on this interaction and impact your evaluation score.',
+      tag: 'Compliance' },
+    { text: ci.guidance,
+      ref: item.type==='case' ? item.caseNum : null,
+      why: 'Derived from analysis of similar cases resolved by top-performing agents over the last 90 days. Agents who reference relevant knowledge articles early see significantly faster resolution times.',
+      tag: 'Knowledge' },
+    { text: ci.suggestion,
+      ref: null,
+      why: 'The Quality Evaluation Agent identified this action sequence as the highest-probability path to first-contact resolution for this case type based on your team\'s historical outcomes.',
+      tag: 'Action' },
+    { text: ci.evaluation,
+      ref: null,
+      why: 'Your current evaluation plan weights these criteria most heavily this quarter. Agent Coach surfaces these in real time to keep your coaching aligned with your performance goals.',
+      tag: 'Evaluation' },
+    { text: 'Customer sentiment is ' + ci.sentiment + '. Acknowledge the customer\'s emotional state before moving to solutions — this consistently improves CSAT and de-escalation outcomes.',
+      ref: null,
+      why: 'Real-time sentiment analysis is continuously running on this interaction. Agents who acknowledge sentiment before offering solutions achieve 18% higher CSAT scores on average.',
+      tag: 'Sentiment' }
+  ];
+}
+
+function formatTipText(text) {
+  return text
+    .replace(/(\d+%|\$\d[\d,]*K?)/g, '<span style="color:#ca5010;font-weight:600">$1</span>')
+    .replace(/\b(KB[-\s]?\d+|SP-\d+|FP-\d+|RP-\d+|CR-[\w-]+|ESC-\d+|CAS-[\w-]+)\b/g,
+      '<span style="color:#0078d4;font-weight:500">$1</span>');
+}
+
+function refreshBanner() {
+  const wrap = document.getElementById('ac-banner-wrap');
+  if (wrap && state.selectedItem) wrap.innerHTML = makeBanner(state.selectedItem);
+}
+
+function toggleAcTip(id, idx) {
+  if (!state.acChecked[id]) state.acChecked[id] = [false,false,false,false,false];
+  state.acChecked[id][idx] = !state.acChecked[id][idx];
+  refreshBanner();
+}
+
+function toggleAcAbout(id, idx) {
+  const key = id+'-'+idx;
+  state.acExpanded[key] = !state.acExpanded[key];
+  refreshBanner();
+}
+
+function toggleAcFeedback(id, which) {
+  state.acFeedback[id] = state.acFeedback[id]===which ? null : which;
+  refreshBanner();
+  showToast(which==='up' ? 'Thanks — feedback recorded!' : 'Got it — we\'ll improve these suggestions');
+}
+
+// ── BANNER ──
+function makeBanner(item) {
+  if (!state.acChecked[item.id]) state.acChecked[item.id] = [false,false,false,false,false];
+  const checked = state.acChecked[item.id];
+  const tips = getTips(item);
+  const doneCount = checked.filter(Boolean).length;
+  const pct = Math.round(doneCount / tips.length * 100);
+  const fb = state.acFeedback[item.id] || null;
+
+  const tipsHtml = tips.map((tip, idx) => {
+    const isChecked = checked[idx];
+    const key = item.id+'-'+idx;
+    const isExpanded = !!(state.acExpanded[key]);
+    return `
+    <div class="ac-tip-row">
+      <button class="ac-tip-check${isChecked?' checked':''}" onclick="toggleAcTip('${item.id}',${idx})">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 10l4 4 8-8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="ac-tip-body">
+        <div class="ac-tip-text${isChecked?' crossed':''}">${formatTipText(tip.text)}</div>
+        ${tip.ref?`<a class="ac-tip-ref" onclick="showToast('Opening ${tip.ref}')"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M7 3h10v12H7V3zm-3 3H3v12h10v-1H4V6z"/></svg>${tip.ref}</a>`:''}
+        ${isExpanded?`<div class="ac-tip-about-box"><span class="ac-tip-about-tag">${tip.tag}</span><br>${tip.why}</div>`:''}
+      </div>
+      <button class="ac-about-btn" onclick="toggleAcAbout('${item.id}',${idx})">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm0 13.5a1 1 0 110-2 1 1 0 010 2zm.5-4h-1V8h1v3.5z"/></svg>
+        About this suggestion
+      </button>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="ac-banner${state.bannerMinimized?' mini':''}">
+    <div class="ac-hd" onclick="toggleBanner()">
+      <div class="ac-hd-l">
+        <svg class="ac-sparkle" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2l1.6 5.4H17l-4.6 3.3 1.7 5.3L10 13.2l-4.1 2.8 1.7-5.3L3 7.4h5.4L10 2z"/></svg>
+        <span class="ac-title">Agent Coach</span>
+        <span class="ac-live"><span class="ac-live-dot"></span>Live</span>
+      </div>
+      <div class="ac-hd-r">
+        <button class="ac-ico" onclick="event.stopPropagation();showToast('Refreshed')" title="Refresh">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 10a6 6 0 0110.2-4.3M16 10a6 6 0 01-10.2 4.3M16 6v4h-4M4 14v-4h4" stroke-linecap="round"/></svg>
+        </button>
+        <button class="ac-ico${fb==='up'?' active':''}" onclick="event.stopPropagation();toggleAcFeedback('${item.id}','up')" title="Helpful">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9V17H3V9h3zm1-1l3-6a2 2 0 014 0v4h3a1 1 0 011 1l-2 7H7V8z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="ac-ico${fb==='down'?' active':''}" onclick="event.stopPropagation();toggleAcFeedback('${item.id}','down')" title="Not helpful">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 11V3h3v8h-3zm-1 1l-3 6a2 2 0 01-4 0v-4H3a1 1 0 01-1-1l2-7h9v6z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="ac-progress-section">
+      <div class="ac-prog-header">
+        <span class="ac-prog-label">Progress</span>
+        <span class="ac-prog-count">${doneCount}/${tips.length} addressed</span>
+      </div>
+      <div class="ac-prog-track"><div class="ac-prog-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="ac-tips-wrap">${tipsHtml}</div>
+    <div class="ac-feedback-row">
+      <span>Was this helpful?</span>
+      <button class="ac-fb-btn${fb==='up'?' active':''}" onclick="toggleAcFeedback('${item.id}','up')">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9V17H3V9h3zm1-1l3-6a2 2 0 014 0v4h3a1 1 0 011 1l-2 7H7V8z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="ac-fb-btn${fb==='down'?' active':''}" onclick="toggleAcFeedback('${item.id}','down')">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 11V3h3v8h-3zm-1 1l-3 6a2 2 0 01-4 0v-4H3a1 1 0 01-1-1l2-7h9v6z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>`;
+}
+
+// ── RENDER ──
+function render() {
+  updateSessionTabs();
+  renderInboxPane();
+  const el = document.getElementById('main-scroll');
+  el.innerHTML='';
+  el.scrollTop=0;
+
+  if(state.view==='home') el.innerHTML=renderHome();
+  else if(state.view==='inbox') el.innerHTML=renderInboxEmpty();
+  else if(state.view==='detail' && state.selectedItem) {
+    el.innerHTML = state.selectedItem.type==='email' ? renderEmailDetail() : renderCaseDetail();
+  }
+  else if(state.view==='scorecard') el.innerHTML=renderScorecard();
+  else if(state.view==='evaluations') el.innerHTML=renderEvaluations();
+  else if(state.view==='governance') el.innerHTML=renderGovernance();
+  else if(state.view==='playbook') el.innerHTML=renderPlaybook();
+  else el.innerHTML=renderPlaceholder(state.view);
+
+  if(state.copilotOpen) renderCopilot();
+}
+
+// ── HOME ──
+function renderHome() {
+  return `
+  <div class="view-pad">
+    <div class="v-title">Home</div>
+    <div class="v-sub">Welcome back, Jessica. Here's your day at a glance.</div>
+    <div class="sc-grid">
+      <div class="sc-card"><div class="sc-val g">4.7</div><div class="sc-lbl">CSAT Score (30d)</div><div class="sc-trend up">↑ +0.2 vs last month</div></div>
+      <div class="sc-card"><div class="sc-val">87%</div><div class="sc-lbl">First Contact Resolution</div><div class="sc-trend up">↑ +3%</div></div>
+      <div class="sc-card"><div class="sc-val w">6m 42s</div><div class="sc-lbl">Avg Handle Time</div><div class="sc-trend dn">↑ +22s vs target</div></div>
+    </div>
+    <div class="prog-card">
+      <div class="prog-title">Today's Workload</div>
+      <div class="prog-row"><div class="prog-lr"><span>Cases Open</span><span>3</span></div><div class="prog-bar"><div class="prog-fill" style="width:60%"></div></div></div>
+      <div class="prog-row"><div class="prog-lr"><span>Emails Pending</span><span>2</span></div><div class="prog-bar"><div class="prog-fill w" style="width:40%"></div></div></div>
+      <div class="prog-row"><div class="prog-lr"><span>Eval Plan Progress</span><span>72%</span></div><div class="prog-bar"><div class="prog-fill g" style="width:72%"></div></div></div>
+    </div>
+    <div class="prog-card">
+      <div class="prog-title" style="display:flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 20 20" fill="#0078d4"><path d="M10 1.5L2 5v4c0 4.4 3.4 8.5 8 9.5 4.6-1 8-5.1 8-9.5V5L10 1.5z"/></svg>Agent Coach Summary</div>
+      <div style="font-size:13px;color:#605e5c;line-height:1.6;margin-top:4px">You have <strong style="color:#0078d4">5 items</strong> in your inbox. Agent Coach is monitoring all open cases and emails in real-time. <span style="color:#ca5010">2 items</span> have compliance alerts that need attention.</div>
+      <div style="margin-top:10px;display:flex;gap:8px"><button class="ph-btn" onclick="switchSession('inbox')">View Inbox</button><button class="ph-btn" style="background:transparent;color:#0078d4;border:1px solid #0078d4" onclick="navigate('scorecard')">My Scorecard</button></div>
+    </div>
+  </div>`;
+}
+
+// ── INBOX EMPTY ──
+function renderInboxEmpty() {
+  return `
+  <div class="inbox-empty">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 5h16v1.5L10 12 2 6.5V5zm0 3l8 5 8-5V15H2V8z"/></svg>
+    <h3>Select a work item</h3>
+    <p>Choose an item from the Inbox panel on the left to open it here.</p>
+  </div>`;
+}
+
+// ── CASE DETAIL ──
+function renderCaseDetail() {
+  const item=state.selectedItem, ci=item.coachInsight, tab=state.detailTab;
+  const now='3/28/2026 9:12 AM';
+  return `
+  <div class="det-wrap">
+    <div class="cmd-bar">
+      <button class="cb primary" onclick="showToast('Saved')">
+        <svg viewBox="0 0 20 20" fill="none" stroke="white" stroke-width="1.5"><path d="M4 14v3h12v-3M10 3v9M7 9l3 3 3-3" stroke-linecap="round" stroke-linejoin="round"/></svg>Save
+      </button>
+      <button class="cb" onclick="showToast('Saved and closed')">Save &amp; Close</button>
+      <button class="cb" onclick="showToast('Saved and routed')">Save &amp; Route</button>
+      <button class="cb" onclick="navigate('evaluations')">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M4 4h12v1.5H4V4zm0 3.5h12V9H4V7.5zm0 3.5h8v1.5H4V11z"/></svg>Request evaluation
+      </button>
+      <div class="cmd-sep"></div>
+      <button class="cb" onclick="showToast('Refreshed')">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 10a6 6 0 0110.2-4.3M16 10a6 6 0 01-10.2 4.3M16 6v4h-4M4 14v-4h4" stroke-linecap="round"/></svg>Refresh
+      </button>
+      <button class="cb" onclick="showToast('New item')">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 4v12M4 10h12" stroke-linecap="round"/></svg>New
+      </button>
+      <button class="cb" onclick="showToast('Case resolved!')">Resolve Case</button>
+      <button class="cb" onclick="showToast('Case cancelled')">Cancel Case</button>
+      <button class="cb" onclick="showToast('Assigned')">Assign</button>
+      <button class="cb" onclick="showToast('Added to queue')">Add to Queue</button>
+      <div class="cmd-sep"></div>
+      <button class="cb" onclick="showToast('Queue item details')">Queue Item Details</button>
+      <button class="cb" onclick="showToast('Child case created')">Create Child Case</button>
+      <button class="cb" onclick="showToast('Deleted')">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M8 2h4v1.5H8V2zm-3 2.5h10l-1 13H6l-1-13zm3 2v8h1.5V6.5H8zm2.5 0v8H12V6.5h-1.5z"/></svg>Delete
+      </button>
+      <div class="cmd-sep"></div>
+      <button class="cb" onclick="showToast('More actions')">···</button>
+      <div class="cb-spacer"></div>
+      <button class="cb" onclick="showToast('Shared')">↗ Share</button>
+    </div>
+
+    <div class="det-title-bar">
+      <div class="det-title-row">
+        <div>
+          <span class="det-title-text">${item.subject}</span>
+          <span class="det-saved">· Saved</span>
+        </div>
+      </div>
+      <div class="det-meta-row">
+        <div class="det-meta-item">
+          <span class="det-meta-label">Case</span>
+          <span style="color:#0078d4;cursor:pointer" onclick="showToast('Opening case details')">Case for Multisession experience</span>
+        </div>
+        <div class="det-meta-item">
+          <span class="det-meta-label">Case Number</span>
+          <span>${item.caseNum||'—'}</span>
+          <span style="color:#a19f9d;margin-left:4px">···</span>
+        </div>
+        <div class="det-meta-item">
+          <span class="det-meta-label">Origin</span>
+          <span>${item.channel}</span>
+        </div>
+        <div class="det-meta-item">
+          <span class="det-meta-label">Created On</span>
+          <span>${now}</span>
+        </div>
+        <div class="det-meta-item" style="border-right:none">
+          <div class="det-owner-avatar">JL</div>
+          <span style="color:#0078d4;cursor:pointer;margin-left:4px">Jessica Li</span>
+          <span class="det-meta-label" style="margin-left:4px">Owner</span>
+        </div>
+      </div>
+      <div class="det-tabs-row">
+        <div class="det-tabs">
+          <button class="det-tab ${tab==='summary'?'active':''}" onclick="setDetailTab('summary')">Summary</button>
+          <button class="det-tab ${tab==='details'?'active':''}" onclick="setDetailTab('details')">Details</button>
+          <button class="det-tab ${tab==='attachments'?'active':''}" onclick="setDetailTab('attachments')">Attachments</button>
+          <button class="det-tab ${tab==='related'?'active':''}" onclick="setDetailTab('related')">
+            Related
+            <svg viewBox="0 0 20 20" fill="currentColor" width="10" height="10" style="margin-left:3px;opacity:.6"><path d="M5 8l5 5 5-5"/></svg>
+          </button>
+        </div>
+        <button class="det-form-assist" onclick="toggleCopilot()">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm1 11H9V9h2v4zm0-6H9V5h2v2z"/></svg>
+          Form assist
+        </button>
+      </div>
+    </div>
+
+    <div class="ai-bar">
+      <div class="ai-bar-left">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm1 11H9V9h2v4zm0-6H9V5h2v2z"/></svg>
+        <span>Case contains saved AI changes based on conv…</span>
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 13V7M4 10h12" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 5H4a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1v-3M9 11L17 3M14 3h3v3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="ai-bar-right">
+        <svg viewBox="0 0 20 20" fill="currentColor" style="color:#0078d4"><path d="M3 13h3v5H3v-5zm4-5h3v10H7V8zm4-4h3v14h-3V4zm4 2h3v12h-3V6z"/></svg>
+        <span style="color:#0078d4;cursor:pointer" onclick="toggleCopilot()">Drop files or smart paste for Copilot to make suggestions</span>
+        <svg viewBox="0 0 20 20" fill="currentColor" style="color:#a19f9d"><path d="M7 14a1 1 0 000-2H4v-2h3a3 3 0 010-6H4V2H3v2H1v2h2v2H1v2h2v2H1v2h2v2h1v-2h3a1 1 0 000-2H4v-2h3z"/></svg>
+      </div>
+    </div>
+
+    <div class="det-content">
+      <div class="det-cols" style="overflow-y:auto;padding-bottom:16px">
+        ${tab==='summary' ? renderCaseSummaryTab(item) : tab==='details' ? renderCaseDetailsTab(item) : tab==='attachments' ? renderCaseAttachmentsTab() : renderCaseRelatedTab(item)}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderCaseSummaryTab(item) {
+  const ci=item.coachInsight;
+  return `
+  <div style="display:flex;flex-direction:column;gap:10px;min-height:0">
+    <div id="ac-banner-wrap">${makeBanner(item)}</div>
+    <div class="form-card">
+      <div class="activities-section">
+        <div class="activities-title">Due and Overdue Activities</div>
+        <div class="activities-table">
+          <div class="activities-table-hd">Activities</div>
+          <div class="activities-table-row">No activities due today</div>
+        </div>
+      </div>
+      <div class="ff-section">
+        <div class="ff-row">
+          <div class="ff-label">Case Title<span class="req">*</span></div>
+          <div class="ff-val"><input class="ff-input" value="${item.subject}"/></div>
+        </div>
+        <div class="ff-row">
+          <div class="ff-label">Customer<span class="req">*</span></div>
+          <div class="ff-val">
+            <div class="ff-chip-wrap">
+              <span class="ff-chip">${item.from}<button class="ff-chip-x" onclick="showToast('Customer removed')">×</button></span>
+              <button class="ff-chip-search" onclick="showToast('Customer lookup')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.5 12.5l4 4" stroke-linecap="round"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div class="ff-row">
+          <div class="ff-label">Subject</div>
+          <div class="ff-val"><div class="ff-plain" style="color:#a19f9d">—</div></div>
+        </div>
+        <div class="ff-row">
+          <div class="ff-label">Priority</div>
+          <div class="ff-val">
+            <button class="ff-dropdown" onclick="showToast('Priority dropdown')">
+              <span class="dd-icon">😊</span>${item.priority}
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 8l5 5 5-5"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="ff-row">
+          <div class="ff-label">Case Status</div>
+          <div class="ff-val">
+            <button class="ff-dropdown" onclick="showToast('Status dropdown')">
+              In Progress<svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 8l5 5 5-5"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="ff-row">
+          <div class="ff-label">Product</div>
+          <div class="ff-val">
+            <div class="ff-chip-wrap">
+              <div class="ff-plain" style="color:#a19f9d;flex:1">—</div>
+              <button class="ff-chip-search" onclick="showToast('Product lookup')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.5 12.5l4 4" stroke-linecap="round"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div class="ff-row">
+          <div class="ff-label">Description</div>
+          <div class="ff-val"><textarea class="ff-input multiline">${item.from} reported: ${item.subject}. ${item.coachInsight.suggestion.slice(0,80)}.</textarea></div>
+        </div>
+        <div class="ff-row" style="border-bottom:none">
+          <div class="ff-label">AI Agent Status</div>
+          <div class="ff-val">
+            <div class="ff-agent-status">
+              <span class="ff-agent-ico"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M8 2h4v1.5H8V2zm-3 2.5h10l-.5 7H5.5l-.5-7z"/></svg></span>
+              <span class="ff-agent-ico"><svg viewBox="0 0 20 20" fill="#0078d4"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2z"/></svg></span>
+              <a onclick="showToast('AI Agent Status: Idle')">Idle</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:0">
+    ${renderTimeline(item)}
+  </div>`;
+}
+
+function renderCaseDetailsTab(item) {
+  return `
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div class="form-card">
+      <div class="ff-section">
+        <div class="ff-row"><div class="ff-label">Queue</div><div class="ff-val"><div class="ff-plain">${item.queue}</div></div></div>
+        <div class="ff-row"><div class="ff-label">Channel</div><div class="ff-val"><div class="ff-plain">${item.channel}</div></div></div>
+        <div class="ff-row"><div class="ff-label">Product</div><div class="ff-val"><div class="ff-plain">${item.product}</div></div></div>
+        <div class="ff-row"><div class="ff-label">Owner</div><div class="ff-val"><div class="ff-plain" style="color:#0078d4;cursor:pointer">Jessica Li</div></div></div>
+        <div class="ff-row"><div class="ff-label">Team</div><div class="ff-val"><div class="ff-plain">Tier 1 Support</div></div></div>
+        <div class="ff-row"><div class="ff-label">SLA Status</div><div class="ff-val"><div class="ff-plain" style="color:#107c10">On Track</div></div></div>
+        <div class="ff-row" style="border-bottom:none"><div class="ff-label">Satisfaction</div><div class="ff-val"><div class="ff-plain" style="color:#a19f9d">—</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div>${renderTimeline(item)}</div>`;
+}
+
+function renderCaseAttachmentsTab() {
+  return `
+  <div class="form-card" style="padding:14px">
+    <div style="font-size:13px;color:#a19f9d;margin-bottom:10px">No attachments on this case.</div>
+    <button class="ac-btn" onclick="showToast('Opening file picker…')">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 4v12M4 10h12" stroke-linecap="round"/></svg>Add Attachment
+    </button>
+  </div>
+  <div>${renderTimeline(null)}</div>`;
+}
+
+function renderCaseRelatedTab(item) {
+  return `
+  <div class="form-card">
+    <div class="ff-section">
+      <div style="font-size:12px;font-weight:600;color:#201f1e;margin-bottom:8px">Related Knowledge Articles</div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div style="font-size:13px;color:#0078d4;cursor:pointer;padding:3px 0" onclick="showToast('Opening KB-4521…')">KB-4521: Portal Login Troubleshooting Guide</div>
+        <div style="font-size:13px;color:#0078d4;cursor:pointer;padding:3px 0" onclick="showToast('Opening KB-3892…')">KB-3892: Account Reset Procedures</div>
+        <div style="font-size:13px;color:#0078d4;cursor:pointer;padding:3px 0" onclick="showToast('Opening KB-8812…')">KB-8812: Common Authentication Error Codes</div>
+      </div>
+    </div>
+  </div>
+  <div>${renderTimeline(item)}</div>`;
+}
+
+function renderTimeline(item) {
+  return `
+  <div class="tl-card">
+    <div class="tl-hd">
+      <span class="tl-hd-title">Timeline</span>
+      <div class="tl-hd-actions">
+        <button class="tl-ico" title="Add note" onclick="showToast('Adding note…')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 4v12M4 10h12" stroke-linecap="round"/></svg></button>
+        <button class="tl-ico" title="Pin" onclick="showToast('Pinned')"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2l2 6h5l-4 3 1.5 6L10 14l-4.5 3 1.5-6-4-3h5z"/></svg></button>
+        <button class="tl-ico" title="Filter" onclick="showToast('Filter timeline')"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 5h14v2l-5 5v5l-4-2V12L3 7V5z"/></svg></button>
+        <button class="tl-ico" title="List view" onclick="showToast('List view')"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 5h14v2H3V5zm0 4h14v2H3V9zm0 4h14v2H3v-2z"/></svg></button>
+        <button class="tl-ico" title="Refresh" onclick="showToast('Timeline refreshed')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 10a6 6 0 0110.2-4.3M16 10a6 6 0 01-10.2 4.3M16 6v4h-4M4 14v-4h4" stroke-linecap="round"/></svg></button>
+        <button class="tl-ico" title="More" onclick="showToast('More options')"><svg viewBox="0 0 20 20" fill="currentColor"><circle cx="5" cy="10" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/></svg></button>
+      </div>
+    </div>
+    <div class="tl-search">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.5 12.5l4 4" stroke-linecap="round"/></svg>
+      <input placeholder="Search timeline"/>
+    </div>
+    <div class="tl-note" onclick="showToast('Enter a note…')">
+      <div class="tl-note-avatar">JL</div>
+      <span class="tl-note-placeholder">Enter a note…</span>
+    </div>
+    <div class="tl-scroll">
+      <div class="tl-section">
+        <div class="tl-section-hd" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+          <span class="tl-section-label">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm0 14a6 6 0 110-12 6 6 0 010 12zm0-10a1 1 0 100 2 1 1 0 000-2zm-.5 3h1v4h-1V9z"/></svg>
+            Highlights
+          </span>
+          <svg class="tl-chevron open" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 8l5 5 5-5" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="tl-highlight-info">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm0 14a6 6 0 110-12 6 6 0 010 12zm0-10a1 1 0 100 2 1 1 0 000-2zm-.5 3h1v4h-1V9z"/></svg>
+            There's not enough information to generate highlights.
+          </div>
+        </div>
+      </div>
+      <div class="tl-section">
+        <div class="tl-section-hd" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+          <span class="tl-section-label">∨ Recent</span>
+        </div>
+        <div>
+          ${item ? `
+          <div class="tl-entry">
+            <div class="tl-entry-avatar" style="background:#8764b8">JL</div>
+            <div class="tl-entry-body">
+              <div class="tl-entry-time">Modified on: 3/28/2026 9:12 AM</div>
+              <div class="tl-entry-title">
+                <span style="font-size:12px;margin-right:6px">💬</span>Live chat from:
+                <span class="tl-entry-sub" style="display:inline">${item.from}</span>
+                <span style="font-size:11px;background:#dff6dd;color:#107c10;padding:1px 5px;border-radius:2px;margin-left:4px">Closed</span>
+              </div>
+              <div class="tl-entry-desc">${item.subject}</div>
+              <div style="margin-top:4px">
+                <a class="tl-entry-sub" onclick="showToast('View more')">View more</a>
+              </div>
+              <div class="tl-entry-actions">
+                <button class="tl-entry-ico" title="Assign"><svg viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="7" r="4"/><path d="M2 17a8 8 0 0116 0"/></svg></button>
+                <button class="tl-entry-ico" title="Edit"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M14.5 2.5l3 3-11 11H3.5v-3l11-11z"/></svg></button>
+                <button class="tl-entry-ico" title="Copy"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M7 3h10v12H7V3zm-3 3H3v12h10v-1H4V6z"/></svg></button>
+                <button class="tl-entry-ico" title="Delete"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M8 2h4v1.5H8V2zm-3 2.5h10l-1 13H6l-1-13z"/></svg></button>
+              </div>
+            </div>
+          </div>
+          <div class="tl-autopost">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2z"/></svg>
+            Auto-post on Case ${item.caseNum||''}… · 3/28/2026 9:12 AM · Case created by <a style="color:#0078d4;cursor:pointer">Jessica Li</a> for Contact <a style="color:#0078d4;cursor:pointer">${item.from}</a>
+          </div>` : '<div class="tl-autopost">No recent activity.</div>'}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── EMAIL BODY TIP DETECTION ──
+let _lastTipCount = 0;
+function checkEmailBody(itemId) {
+  const ed = document.getElementById('email-body-ed');
+  if (!ed) return;
+  const text = (ed.innerText || ed.textContent || '').toLowerCase();
+  if (!state.acChecked[itemId]) state.acChecked[itemId] = [false,false,false,false,false];
+  const item = CASES.find(c=>c.id===itemId);
+  if (!item) return;
+  const stopWords = new Set(['about','their','which','these','those','would','could','should','there','where','when','with','from','that','this','have','will','your','been','more','than','they','also','some','into','then','over','such']);
+  const tips = getTips(item);
+  let changed = false;
+  const bodyWords = text.split(/\W+/).filter(w=>w.length>=5 && !stopWords.has(w));
+  tips.forEach((tip, idx) => {
+    if (state.acChecked[itemId][idx]) return;
+    const tipWords = tip.text.toLowerCase().split(/\W+/).filter(w=>w.length>=5 && !stopWords.has(w));
+    const hits = tipWords.filter(w=>bodyWords.includes(w)).length;
+    if (hits >= 3) { state.acChecked[itemId][idx] = true; changed = true; }
+  });
+  if (changed) {
+    refreshBanner();
+    const done = state.acChecked[itemId].filter(Boolean).length;
+    if (done > _lastTipCount) { _lastTipCount = done; showToast('Agent Coach tip addressed ✓'); }
+  }
+}
+
+let _draftCopTab = '';
+function closeDraftCop() {
+  const p = document.getElementById('draft-cop-panel');
+  if (p) p.style.display = 'none';
+}
+function openDraftCop() {
+  const p = document.getElementById('draft-cop-panel');
+  if (p) p.style.display = 'block';
+}
+function setDraftCopTab(tab) {
+  _draftCopTab = tab;
+  document.querySelectorAll('.draft-cop-tab').forEach(t => t.classList.toggle('active', t.dataset.tab===tab));
+  const gen = document.getElementById('draft-cop-gen');
+  if (gen) { gen.classList.add('ready'); gen.disabled = false; }
+}
+
+// ── EMAIL DETAIL ──
+function renderEmailDetail() {
+  const item = state.selectedItem;
+  const initBody = `Hello ${item.from.split(' ')[0]},\n\nThank you for reaching out. I understand this situation has been challenging, and I am here to help you resolve it as quickly as possible.\n\nI am reviewing the details of your request now and will follow up with next steps shortly. In the meantime, please feel free to add any additional context that might help.\n\nBest regards,\nJessica Li\nCopilot Service Workspace`;
+  _lastTipCount = (state.acChecked[item.id]||[]).filter(Boolean).length;
+  return `
+  <div class="det-wrap">
+
+    <!-- COMMAND BAR -->
+    <div class="cmd-bar">
+      <button class="cb primary" onclick="showToast('Email sent')">
+        <svg viewBox="0 0 20 20" fill="none" stroke="white" stroke-width="1.5"><path d="M2 10l16-8-6 16-3-5-7-3z" stroke-linecap="round" stroke-linejoin="round"/></svg>Send
+      </button>
+      <button class="cb" onclick="showToast('Saved')">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 14v3h12v-3M10 3v9M7 9l3 3 3-3" stroke-linecap="round"/></svg>Save
+      </button>
+      <button class="cb" onclick="showToast('Saved and closed')">Save &amp; Close</button>
+      <div class="cmd-sep"></div>
+      <button class="cb" onclick="showToast('Refreshed')">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 10a6 6 0 0110.2-4.3M16 10a6 6 0 01-10.2 4.3M16 6v4h-4M4 14v-4h4" stroke-linecap="round"/></svg>Refresh
+      </button>
+      <button class="cb" onclick="showToast('Checking access…')">Check Access</button>
+      <button class="cb" onclick="showToast('Attaching file…')">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 10.5V14a4 4 0 01-8 0V6a2.5 2.5 0 015 0v8a1 1 0 01-2 0V8" stroke-linecap="round"/></svg>Attach File
+      </button>
+      <button class="cb" onclick="showToast('Insert template…')">Insert Template
+        <svg viewBox="0 0 20 20" fill="currentColor" width="10" height="10"><path d="M5 8l5 5 5-5"/></svg>
+      </button>
+      <button class="cb" onclick="showToast('Insert signature…')">Insert Signature</button>
+      <button class="cb" onclick="showToast('Process…')">Process
+        <svg viewBox="0 0 20 20" fill="currentColor" width="10" height="10"><path d="M5 8l5 5 5-5"/></svg>
+      </button>
+      <div class="cmd-sep"></div>
+      <button class="cb" onclick="showToast('Convert to…')">Convert To
+        <svg viewBox="0 0 20 20" fill="currentColor" width="10" height="10"><path d="M5 8l5 5 5-5"/></svg>
+      </button>
+      <button class="cb" onclick="showToast('Deleted')">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M8 2h4v1.5H8V2zm-3 2.5h10l-1 13H6l-1-13zm3 2v8h1.5V6.5H8zm2.5 0v8H12V6.5h-1.5z"/></svg>Delete
+      </button>
+      <button class="cb" onclick="showToast('Link copied')">Email a Link</button>
+      <button class="cb" onclick="showToast('More')">···</button>
+      <div class="cb-spacer"></div>
+      <button class="cb" onclick="showToast('Shared')">↗ Share
+        <svg viewBox="0 0 20 20" fill="currentColor" width="10" height="10"><path d="M5 8l5 5 5-5"/></svg>
+      </button>
+    </div>
+
+    <!-- TITLE BAR -->
+    <div class="det-title-bar">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px 0;gap:16px">
+        <div style="display:flex;align-items:center;gap:0;min-width:0;flex:1">
+          <span class="det-title-text" style="font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.subject}</span>
+          <span class="det-saved" style="white-space:nowrap">· Saved</span>
+        </div>
+        <div class="email-meta-bar" style="flex-shrink:0">
+          <div class="emc"><div class="emc-val">${item.priority}</div><div class="emc-lbl">Priority</div></div>
+          <div class="emc"><div class="emc-val" style="color:#a19f9d">---</div><div class="emc-lbl">Due</div></div>
+          <div class="emc"><div class="emc-val">${item.status}</div><div class="emc-lbl">Status Reason</div></div>
+          <div class="emc">
+            <div class="emc-avatar">JL</div>
+            <div><div class="emc-val">Jessica Li</div><div class="emc-lbl">Owner</div></div>
+            <svg viewBox="0 0 20 20" fill="currentColor" width="10" height="10" style="color:#a19f9d"><path d="M5 8l5 5 5-5"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="det-tabs-row" style="padding:0 16px">
+        <div class="det-tabs">
+          <button class="det-tab active">Email</button>
+          <button class="det-tab" onclick="showToast('Related')">Related
+            <svg viewBox="0 0 20 20" fill="currentColor" width="10" height="10" style="margin-left:2px"><path d="M5 8l5 5 5-5"/></svg>
+          </button>
+        </div>
+        <button class="det-form-assist" onclick="toggleCopilot()">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2l1.6 5.4H17l-4.6 3.3 1.7 5.3L10 13.2l-4.1 2.8 1.7-5.3L3 7.4h5.4L10 2z"/></svg>
+          Form assist
+        </button>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="det-content" style="overflow:hidden;display:flex;flex-direction:column">
+
+      <!-- Agent Coach banner -->
+      <div id="ac-banner-wrap" style="padding:12px 16px 0;flex-shrink:0">${makeBanner(item)}</div>
+
+      <!-- Email grid: compose + attachment panel — same padding/gap as case det-cols -->
+      <div style="display:grid;grid-template-columns:1fr 280px;flex:1;overflow:hidden;min-height:0;padding:12px 16px 16px;gap:12px">
+
+        <!-- LEFT: Email compose (floating card like form-card) -->
+        <div style="display:flex;flex-direction:column;overflow:hidden;background:#fff;border:1px solid #edebe9;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+
+          <!-- Fields table -->
+          <div class="ef-table">
+            <div class="ef-row">
+              <span class="ef-label">Related</span>
+              <div class="ef-control"><input class="ef-input" placeholder="---" onclick="showToast('Search related records')"/></div>
+              <button class="ef-search" title="Search"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.5 12.5l4 4" stroke-linecap="round"/></svg></button>
+            </div>
+            <div class="ef-row">
+              <span class="ef-label">From</span>
+              <div class="ef-control">
+                <span class="ef-chip">
+                  <span class="ef-chip-avatar">${item.ownerInitials}</span>
+                  ${item.owner}<span class="ef-chip-status">&nbsp;(Offline)</span>
+                  <button class="ef-chip-x" onclick="showToast('Sender removed')">×</button>
+                </span>
+              </div>
+              <button class="ef-search" title="Search sender"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.5 12.5l4 4" stroke-linecap="round"/></svg></button>
+            </div>
+            <div class="ef-row">
+              <span class="ef-label">To</span>
+              <div class="ef-control"><input class="ef-input" placeholder="---" id="ef-to"/></div>
+              <button class="ef-search" title="Search contacts"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.5 12.5l4 4" stroke-linecap="round"/></svg></button>
+            </div>
+            <div class="ef-row">
+              <span class="ef-label">Cc</span>
+              <div class="ef-control"><input class="ef-input" placeholder="---" id="ef-cc"/></div>
+              <button class="ef-search" title="Search contacts"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.5 12.5l4 4" stroke-linecap="round"/></svg></button>
+            </div>
+            <div class="ef-row">
+              <span class="ef-label">Bcc</span>
+              <div class="ef-control"><input class="ef-input" placeholder="---" id="ef-bcc"/></div>
+              <button class="ef-search" title="Search contacts"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.5 12.5l4 4" stroke-linecap="round"/></svg></button>
+            </div>
+            <div class="ef-row">
+              <span class="ef-label">Subject</span>
+              <div class="ef-control"><input class="ef-input" value="${item.subject}" id="ef-subject" style="font-weight:400"/></div>
+            </div>
+          </div>
+
+          <!-- Body area -->
+          <div class="email-body-area">
+            <!-- Rich text toolbar -->
+            <div class="email-toolbar">
+              <button class="etb-draft" onclick="openDraftCop()">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2l1.6 5.4H17l-4.6 3.3 1.7 5.3L10 13.2l-4.1 2.8 1.7-5.3L3 7.4h5.4L10 2z"/></svg>
+                Draft with Copilot
+                <svg viewBox="0 0 20 20" fill="currentColor" width="10" height="10"><path d="M5 8l5 5 5-5"/></svg>
+              </button>
+              <div class="etb-sep"></div>
+              <select class="etb-select" style="width:28px;padding:2px 2px" onchange="showToast('Font size: '+this.value)">
+                <option>9</option><option selected>11</option><option>12</option><option>14</option><option>16</option>
+              </select>
+              <div class="etb-sep"></div>
+              <select class="etb-select" style="width:80px" onchange="document.getElementById('email-body-ed').style.fontFamily=this.value">
+                <option value='"Segoe UI",sans-serif' selected>Segoe UI</option>
+                <option value='Calibri,sans-serif'>Calibri</option>
+                <option value='Arial,sans-serif'>Arial</option>
+              </select>
+              <div class="etb-sep"></div>
+              <button class="etb-btn" title="Bold" onclick="document.execCommand('bold')"><b>B</b></button>
+              <button class="etb-btn" title="Italic" onclick="document.execCommand('italic')"><i style="font-style:italic">I</i></button>
+              <button class="etb-btn" title="Underline" onclick="document.execCommand('underline')"><u>U</u></button>
+              <div class="etb-sep"></div>
+              <button class="etb-btn" title="Text color" onclick="showToast('Text color')"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2L5 16h2l1.5-4h3L13 16h2L10 2zm-1 8l1-3 1 3H9z"/><rect x="4" y="17" width="12" height="2" fill="#e5353b"/></svg></button>
+              <button class="etb-btn" title="Highlight" onclick="showToast('Highlight')"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 16h14v2H3z"/><path d="M12 3L5 12l2 2 7-9-2-2z" opacity=".6"/><rect x="3" y="16" width="14" height="2" fill="#ffeb3b"/></svg></button>
+              <div class="etb-sep"></div>
+              <button class="etb-btn" title="Bullet list" onclick="document.execCommand('insertUnorderedList')"><svg viewBox="0 0 20 20" fill="currentColor"><circle cx="4" cy="6" r="1.5"/><rect x="7" y="5" width="10" height="1.5" rx=".75"/><circle cx="4" cy="10" r="1.5"/><rect x="7" y="9" width="10" height="1.5" rx=".75"/><circle cx="4" cy="14" r="1.5"/><rect x="7" y="13" width="10" height="1.5" rx=".75"/></svg></button>
+              <button class="etb-btn" title="Numbered list" onclick="document.execCommand('insertOrderedList')"><svg viewBox="0 0 20 20" fill="currentColor"><text x="2" y="8" font-size="7" font-family="inherit">1.</text><text x="2" y="13" font-size="7" font-family="inherit">2.</text><rect x="9" y="5" width="9" height="1.5" rx=".75"/><rect x="9" y="10.5" width="9" height="1.5" rx=".75"/></svg></button>
+              <button class="etb-btn" title="Indent" onclick="document.execCommand('indent')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5h16M2 10h10M2 15h16M13 8l3 2-3 2" stroke-linecap="round"/></svg></button>
+              <div class="etb-sep"></div>
+              <button class="etb-btn" title="More" onclick="showToast('More formatting')">···</button>
+              <div style="flex:1"></div>
+              <button class="etb-btn" title="Expand" onclick="showToast('Expand editor')" style="margin-left:auto"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 3H3v4M17 3h-4M3 13v4h4M13 17h4v-4" stroke-linecap="round"/></svg></button>
+            </div>
+
+            <!-- Editable body + Draft Copilot overlay -->
+            <div style="flex:1;position:relative;overflow:hidden">
+              <div id="email-body-ed" class="email-body-ed" contenteditable="true"
+                oninput="checkEmailBody('${item.id}')"
+                style="white-space:pre-wrap">${initBody}</div>
+
+              <!-- Draft with Copilot floating panel -->
+              <div id="draft-cop-panel" class="draft-cop" style="display:none">
+                <div class="draft-cop-hd">
+                  <div class="draft-cop-title">
+                    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2l1.6 5.4H17l-4.6 3.3 1.7 5.3L10 13.2l-4.1 2.8 1.7-5.3L3 7.4h5.4L10 2z"/></svg>
+                    Draft with Copilot
+                    <span class="draft-cop-info" onclick="showToast('About Draft with Copilot')">ⓘ</span>
+                  </div>
+                  <button class="draft-cop-close" onclick="closeDraftCop()">×</button>
+                </div>
+                <div class="draft-cop-tabs">
+                  <button class="draft-cop-tab" data-tab="call" onclick="setDraftCopTab('call')">Suggest a call</button>
+                  <button class="draft-cop-tab" data-tab="info" onclick="setDraftCopTab('info')">Request more information</button>
+                  <button class="draft-cop-tab active" data-tab="empathize" onclick="setDraftCopTab('empathize')">Empathize with feedback</button>
+                  <button class="draft-cop-tab" data-tab="product" onclick="setDraftCopTab('product')">Provide product/service details</button>
+                  <button class="draft-cop-tab" data-tab="resolve" onclick="setDraftCopTab('resolve')">Resolve customer's problem</button>
+                </div>
+                <div class="draft-cop-body">
+                  <input class="draft-cop-input" id="draft-cop-kw" placeholder="Enter keywords to help Copilot select an email template and draft a response"
+                    oninput="document.getElementById('draft-cop-gen').classList.toggle('ready', this.value.length>0);document.getElementById('draft-cop-gen').disabled=this.value.length===0"/>
+                  <button class="draft-cop-gen" id="draft-cop-gen" disabled
+                    onclick="if(!this.disabled){showToast('Drafting response with Copilot…');closeDraftCop()}">Generate</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Attachment panel (floating card like tl-card) -->
+        <div class="email-att-panel" style="border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid #edebe9">
+          <div class="email-att-panel-hd">Attachment</div>
+          <div class="email-att-meta">
+            <span class="email-att-count">Attachments (0)</span>
+            <div class="email-att-controls">
+              <button class="email-att-ctrl" onclick="showToast('Previous')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5l-5 5 5 5" stroke-linecap="round"/></svg></button>
+              <button class="email-att-ctrl" onclick="showToast('Next')" style="margin-right:4px"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 5l5 5-5 5" stroke-linecap="round"/></svg></button>
+              <button class="email-att-add" onclick="showToast('Add attachment')">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 4v12M4 10h12" stroke-linecap="round"/></svg>
+                <svg viewBox="0 0 20 20" fill="currentColor" width="9" height="9"><path d="M5 8l5 5 5-5"/></svg>
+              </button>
+              <div style="width:1px;height:16px;background:#edebe9;margin:0 4px"></div>
+              <button class="email-att-ico" title="Copy"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M7 3h10v12H7V3zm-3 3H3v12h10v-1H4V6z"/></svg></button>
+              <button class="email-att-ico" title="Duplicate"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 4h10v2H5V4zm0 3h10v2H5V7zm0 3h6v2H5v-2z"/></svg></button>
+              <button class="email-att-ico" title="Download"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v9M7 9l3 3 3-3M4 15h12" stroke-linecap="round"/></svg></button>
+              <button class="email-att-ico" title="Preview"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 4C6 4 2.7 6.7 2 10c.7 3.3 4 6 8 6s7.3-2.7 8-6c-.7-3.3-4-6-8-6zm0 10a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z"/></svg></button>
+              <div style="width:1px;height:16px;background:#edebe9;margin:0 4px"></div>
+              <button class="email-att-ico" title="More"><svg viewBox="0 0 20 20" fill="currentColor"><circle cx="5" cy="10" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/></svg></button>
+            </div>
+          </div>
+          <div class="email-att-empty">No attachments included.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── SCORECARD ──
+function renderScorecard() {
+  return `<div class="cmd-bar"><span style="font-size:13px;font-weight:600;color:#201f1e">Representative Scorecard</span><div class="cb-spacer"></div><button class="cb" onclick="showToast('Exported')">Export</button></div>
+  <div class="view-pad">
+    <div class="v-sub">Performance for Jessica Li · Last 30 days</div>
+    <div class="sc-grid">
+      <div class="sc-card"><div class="sc-val g">4.7</div><div class="sc-lbl">CSAT Score</div><div class="sc-trend up">↑ +0.2</div></div>
+      <div class="sc-card"><div class="sc-val">87%</div><div class="sc-lbl">First Contact Resolution</div><div class="sc-trend up">↑ +3%</div></div>
+      <div class="sc-card"><div class="sc-val w">72</div><div class="sc-lbl">Eval Plan Score (avg)</div><div class="sc-trend dn">↓ -4 vs target</div></div>
+    </div>
+    <div class="prog-card">
+      <div class="prog-title">Evaluation Criteria Performance</div>
+      <div class="prog-row"><div class="prog-lr"><span>Empathy & Tone</span><span>82%</span></div><div class="prog-bar"><div class="prog-fill g" style="width:82%"></div></div></div>
+      <div class="prog-row"><div class="prog-lr"><span>Technical Accuracy</span><span>91%</span></div><div class="prog-bar"><div class="prog-fill g" style="width:91%"></div></div></div>
+      <div class="prog-row"><div class="prog-lr"><span>Resolution Speed</span><span>68%</span></div><div class="prog-bar"><div class="prog-fill w" style="width:68%"></div></div></div>
+      <div class="prog-row"><div class="prog-lr"><span>Documentation</span><span>74%</span></div><div class="prog-bar"><div class="prog-fill" style="width:74%"></div></div></div>
+      <div class="prog-row"><div class="prog-lr"><span>Compliance Adherence</span><span>95%</span></div><div class="prog-bar"><div class="prog-fill g" style="width:95%"></div></div></div>
+    </div>
+  </div>`;
+}
+
+// ── EVALUATIONS ──
+function renderEvaluations() {
+  const ev=[{s:91,t:'CAS-10031 — Technical Support Call',m:'Sarah M. · Mar 28',st:'Completed',sc:'h'},{s:74,t:'CAS-10028 — Billing Dispute',m:'Sarah M. · Mar 25',st:'Completed',sc:'m'},{s:58,t:'Email-0092 — Cancellation Handling',m:'Pending · Mar 22',st:'Pending',sc:'l'},{s:85,t:'CAS-10021 — Onboarding',m:'Alex P. · Mar 20',st:'Completed',sc:'h'},{s:67,t:'CAS-10014 — Return & Refund',m:'Disputed · Mar 18',st:'Disputed',sc:'m'}];
+  const pills={Completed:'done',Pending:'pend',Disputed:'disp'};
+  return `<div class="cmd-bar"><span style="font-size:13px;font-weight:600;color:#201f1e">Evaluations</span><div class="cb-spacer"></div><button class="cb primary" onclick="showToast('New evaluation')">New Evaluation</button></div>
+  <div class="view-pad"><div class="v-sub">5 evaluations · Avg score: 75</div>
+    ${ev.map(e=>`<div class="eval-row" onclick="showToast('Opening evaluation…')"><div class="es ${e.sc}">${e.s}</div><div style="flex:1;min-width:0"><div class="e-title">${e.t}</div><div class="e-meta">${e.m}</div></div><span class="e-pill ${pills[e.st]}">${e.st}</span></div>`).join('')}
+  </div>`;
+}
+
+// ── GOVERNANCE ──
+function renderGovernance() {
+  const rules=[{ok:true,t:'Identity Verification',d:'Verify customer identity using 2 of: account number, date of birth, registered email before sharing account details.'},{ok:true,t:'SLA Response Times',d:'Initial response within 1 business hour. Follow-up within 4 hours on high priority cases.'},{ok:false,t:'Escalation Approval',d:'Escalation to Tier 2 requires manager approval and completion of escalation form ESC-1.'},{ok:true,t:'Data Handling — PII',d:'Do not share PII via email without encryption. Use secure portal for sensitive documents.'},{ok:false,t:'Cancellation Processing',d:'Annual subscription cancellations over $50K ARR require supervisor sign-off before processing.'}];
+  return `<div class="cmd-bar"><span style="font-size:13px;font-weight:600;color:#201f1e">Governance</span><div class="cb-spacer"></div><button class="cb" onclick="showToast('Exported')">Export</button></div>
+  <div class="view-pad"><div class="v-sub">Active governance rules monitored by Agent Coach in real-time</div>
+    ${rules.map(r=>`<div class="gov-item"><div class="gov-ico ${r.ok?'ok':'warn'}"><svg viewBox="0 0 20 20" fill="currentColor">${r.ok?'<path d="M10 1.5L2 5v4c0 4.4 3.4 8.5 8 9.5 4.6-1 8-5.1 8-9.5V5L10 1.5z"/>':'<path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm-.5 4.5h1l-.25 5h-.5L9.5 6.5zm.5 7a1 1 0 110 2 1 1 0 010-2z"/>'}</svg></div><div><div class="gov-t">${r.t}</div><div class="gov-d">${r.d}</div></div></div>`).join('')}
+  </div>`;
+}
+
+// ── PLAYBOOK ──
+function renderPlaybook() {
+  const steps=[{n:1,t:'Acknowledge & Empathize',b:'Open every interaction by acknowledging the customer\'s situation.',tips:['Use the customer\'s name','Avoid dismissive language','Match urgency to customer\'s tone']},{n:2,t:'Clarify & Understand',b:'Ask targeted questions to fully understand the problem before offering solutions.',tips:['Use open-ended questions first','Summarize back to confirm','Check for related issues']},{n:3,t:'Reference Knowledge & Coach Guidance',b:'Consult the Agent Coach panel and Knowledge Base before proposing a solution.',tips:['Check Agent Coach banner for real-time guidance','Search KB for relevant articles','Apply coaching suggestions where appropriate']},{n:4,t:'Resolve or Escalate with Clarity',b:'Resolve if within your authority, or escalate with full context documented.',tips:['Fill escalation form ESC-1 if required','Set clear expectations with the customer','Confirm resolution in writing']},{n:5,t:'Document & Close',b:'Complete all case documentation within 30 minutes of resolution.',tips:['Add detailed resolution notes','Update case status and satisfaction fields','Link any relevant knowledge articles used']}];
+  return `<div class="cmd-bar"><span style="font-size:13px;font-weight:600;color:#201f1e">Agent Coach Playbook</span><div class="cb-spacer"></div><button class="cb" onclick="showToast('Exported')">Export</button></div>
+  <div class="view-pad"><div class="v-sub">Step-by-step coaching guide for every customer interaction</div>
+    ${steps.map(s=>`<div class="play-item"><div class="play-hd" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'"><div class="play-hd-l"><div class="play-num">${s.n}</div><div class="play-step">${s.t}</div></div><svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 8l5 5 5-5" stroke-linecap="round"/></svg></div><div class="play-body"><p>${s.b}</p>${s.tips.map(tip=>`<div class="play-tip"><svg width="11" height="11" viewBox="0 0 20 20" fill="#0078d4"><circle cx="10" cy="10" r="8"/><path d="M7 10l2 2 4-4" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>${tip}</div>`).join('')}</div></div>`).join('')}
+  </div>`;
+}
+
+// ── PLACEHOLDER ──
+function renderPlaceholder(view) {
+  const names={'proactive-activities':'Proactive Coaching Activities','provide-coaching':'Provide Proactive Coaching','eval-criteria':'Evaluation Criteria','eval-plans':'Evaluation Plans','supervisor-scorecard':'Supervisor Scorecard','cases':'Cases','knowledge':'Knowledge Articles','email-templates':'Email Templates','service-activities':'Service Activities','digital-chat':'Digital Chat','voice-calls':'Voice Calls','shift-summary':'Shift Summary','adherence':'Adherence Tracker','forecasting':'Forecasting'};
+  const name=names[view]||view.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase());
+  return `<div class="cmd-bar"><span style="font-size:13px;font-weight:600;color:#201f1e">${name}</span></div>
+  <div class="placeholder"><div class="ph-ico"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2z" opacity=".3"/><path d="M10 6a4 4 0 110 8 4 4 0 010-8z"/></svg></div><div class="ph-title">${name}</div><div class="ph-sub">This view is part of the Copilot Service Workspace. Full functionality available in the production environment.</div><button class="ph-btn" onclick="switchSession('inbox')">← Back to Inbox</button></div>`;
+}
+
+// ── COPILOT PANEL ──
+function renderCopilot() {
+  const el=document.getElementById('cop-body');
+  if(!el) return;
+  const item=state.selectedItem;
+  if(state.copilotTab==='teams') {
+    el.innerHTML=`<div class="cp-card"><div class="cp-lbl">Active Conversations</div><div class="cp-txt" style="color:#a19f9d">No active Teams conversations.</div></div><div class="cp-card"><div class="cp-lbl">Team Members</div>${['Sarah M. — Online','Alex P. — Busy','Jordan T. — Away'].map(m=>`<div style="font-size:12px;color:#605e5c;padding:5px 0;border-bottom:1px solid #f3f2f1">${m}</div>`).join('')}</div>`;
+    return;
+  }
+  if(!item) {
+    el.innerHTML=`<div class="cp-card"><div class="cp-lbl">Copilot</div><div class="cp-txt">Open a case or email to get real-time AI assistance, suggested responses, and knowledge articles.</div></div><div class="cp-card"><div class="cp-lbl">Quick Actions</div><div class="cp-chips"><span class="cp-chip" onclick="showToast('Summarizing…')">Summarize recent cases</span><span class="cp-chip" onclick="showToast('Searching…')">Search knowledge base</span><span class="cp-chip" onclick="navigate('scorecard')">View my scorecard</span></div></div>`;
+    return;
+  }
+  const ci=item.coachInsight;
+  el.innerHTML=`<div class="cp-card"><div class="cp-lbl">Case Summary</div><div class="cp-txt"><strong>${item.from}</strong> (${item.company})<br>${item.subject}<br>Priority: <strong>${item.priority}</strong> · ${item.status}</div></div><div class="cp-card"><div class="cp-lbl">Suggested Response</div><div class="cp-txt">${ci.suggestion}</div><div class="cp-chips"><span class="cp-chip" onclick="showToast('Applied')">Use this response</span><span class="cp-chip" onclick="showToast('Regenerating…')">Regenerate</span></div></div><div class="cp-card"><div class="cp-lbl">Relevant KB Articles</div><div style="font-size:12px;color:#0078d4;cursor:pointer;padding:3px 0" onclick="showToast('Opening KB…')">KB-4521: Portal Login Troubleshooting</div><div style="font-size:12px;color:#0078d4;cursor:pointer;padding:3px 0" onclick="showToast('Opening KB…')">KB-3892: Account Reset Procedures</div></div><div class="cp-card"><div class="cp-lbl">Sentiment</div><div class="cp-txt" style="color:${ci.sentimentColor}"><strong>${ci.sentiment}</strong></div><div class="cp-txt" style="margin-top:4px">${ci.guidance}</div></div>`;
+}
+
+// ── INIT ──
+render();
+document.addEventListener('click', function(e) {
+  const flyout = document.getElementById('ip-nav-flyout');
+  if(!flyout || !flyout.classList.contains('open')) return;
+  if(!flyout.contains(e.target) && !e.target.closest('.ip-ico[title="Filter / Views"]')) {
+    flyout.classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>
